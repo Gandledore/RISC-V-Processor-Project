@@ -166,6 +166,45 @@ void decode_R(char** F){
     printf("Funct7: %d\n", binary_to_dec(F[5]));
 }
 
+void decode_SB(char** F){
+    char imm[12];
+    strcpy(imm,F[5]);
+    strcat(imm,F[1]);
+    int immediate = binary_to_dec(imm);
+    int bit11 = immediate%2 << 11;
+    int bit12 = (immediate>>11)<<12;
+    immediate = (immediate>>1)<<1+bit11+bit12;
+    
+    char operation[5];
+    switch(binary_to_dec(F[2])){
+        case 0:
+            strcpy(operation,"beq");
+            break;
+        case 1:
+            strcpy(operation,"bne");
+            break;
+        case 4:
+            strcpy(operation,"blt");
+            break;
+        case 5:
+            strcpy(operation,"bge");
+            break;
+        case 6:
+            strcpy(operation,"bltu");
+            break;
+        case 7:
+            strcpy(operation,"bgeu");
+            break;
+        default:
+            printf("Undefined behavior for func3 in SB type\n");
+    }
+
+    printf("Instruction Type: SB\n");
+    printf("Operation: %s\n",operation);
+    printf("Rs1: x%d\n", binary_to_dec(F[3]));
+    printf("Rs2: x%d\n", binary_to_dec(F[4]));
+    printf("Immediate: %d\n",immediate);
+}
 
 void decode_UJ(char** F){
     //unscramble immediate field
@@ -203,6 +242,9 @@ void decode_instruction_fields(char** F){
         case 'J':
             decode_UJ(F);
             break;
+        case 'B':
+            decode_SB(F);
+            break;
         default:
             printf("Type: %c not implemented\n",*F[0]);
             break;
@@ -213,7 +255,8 @@ void decode_instruction_fields(char** F){
 int main(){
     // char* test = "00000000001100100000001010110011";//R
     // char* test = "11111110001100100000100000100011";//S
-    char* test = "00000000101000000000000011101111";//UJ
+    // char* test = "00000000101000000000000011101111";//UJ
+    char* test = "00000001111000101001001101100011";//SB
     printf("input: %s\n",test);
     char** F = splitter(test);
     decode_instruction_fields(F);
