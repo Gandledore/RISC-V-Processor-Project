@@ -89,8 +89,27 @@ void decode_S(char** F){
     if(immediate & 0x800){
         immediate |= 0xFFFFF000;
     }
+
+    char operation[3] = "s?\0";
+    switch(binary_to_dec(F[2])){
+        case 0:
+            operation[1] = 'b';
+            break;
+        case 1:
+            operation[1] = 'h';
+            break;
+        case 2:
+            operation[1] = 'w';
+            break;
+        case 3:
+            operation[1] = 'd';
+            break;
+        default:
+            printf("Undefined behavior for func3 in S type\n");
+    }
+
     printf("Instruction Type: S\n");
-    printf("Operation: sb\n");                 //add to this
+    printf("Operation: %s\n",operation);
     printf("Rs1: x%d\n", binary_to_dec(F[3]));
     printf("Rs2: x%d\n", binary_to_dec(F[4]));
     printf("Immediate: %d\n",immediate);
@@ -163,8 +182,8 @@ void decode_instruction_fields(char** F){
 
 
 int main(){
-    char* test = "00000000001100100000001010110011";//R
-    // char* test = "11111110001100100000100000100011";//S
+    // char* test = "00000000001100100000001010110011";//R
+    char* test = "11111110001100100000100000100011";//S
     printf("input: %s\n",test);
     char** F = splitter(test);
     decode_instruction_fields(F);
