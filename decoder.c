@@ -2,6 +2,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+// I: lw andi addi jalr lb lh ori slli slti sltiu srai srli xori
+// S: sb sh sw
+// SB: beq bge blt bne
+// UJ: jal
+
 char* slice(char* input,int start,int end){
     char* slc = malloc(sizeof(char)*(end-start+2)); // +2 to include ending value and null terminator 
     for(int i=0;i<end-start+1;i++){
@@ -47,10 +52,10 @@ char** splitter(char* input){
         type = 'I';
     }
     
-    char** F = malloc(sizeof(char*)*6); //allocate 6 char pointers to store instruction type + 5 fields 
+    char** F = malloc(sizeof(char*)*7); //allocate 6 char pointers to store instruction type + 6 fields 
 
     F[0] = malloc(sizeof(char));
-
+    F[6] = opcode;
     *F[0] = type; // putting instruction type into the value at F[0] address 
 
     F[1] = slice(input, 20, 24); // R,I: rd or S: imm[4:0] or SB: [imm[4:1|11]])
@@ -59,8 +64,8 @@ char** splitter(char* input){
         F[2] = slice(input,0,19); // immediate
     }
     else{ //R,I,S,SB
-        F[2] = slice(input,17,19); // rs1 
-        F[3] = slice(input,12,16); // funct3
+        F[2] = slice(input,17,19); // funct3
+        F[3] = slice(input,12,16); // rs2
         if(type=='I'){
             F[4] = slice(input,0,11); // imm
         }
@@ -91,16 +96,53 @@ void decode_S(char** F){
     printf("Immediate: %d\n",immediate);
 }
 
-
+// R: add and or sll slt sltu sra srl sub xor
 void decode_R(char** F){
     printf("Instruction Type: R\n");
 
-    if (strcmp(F[3], "000") == 0){ // add
+    if (strcmp(F[2], "000") == 0){ // add
         printf("Operation: add\n");
     }
-    printf("Rs1: %d\n", binary_to_dec(F[3]));
-    printf("Rs2: %d\n", binary_to_dec(F[4]));
-    printf("Rd: %d\n", binary_to_dec(F[1]));
+
+    else if ((strcmp(F[2], "111") == 0) && (strcmp(F[5], "0000000") == 0)){ // and
+        printf("Operation: and\n");
+    }
+
+    else if ((strcmp(F[2], "110") == 0) && (strcmp(F[5], "0000000") == 0)){ // or
+        printf("Operation: or\n");
+    }
+
+    else if ((strcmp(F[2], "001") == 0) && (strcmp(F[5], "0000000") == 0)){ // sll
+        printf("Operation: sll\n");
+    }
+
+    else if ((strcmp(F[2], "010") == 0) && (strcmp(F[5], "0000000") == 0)){ // slt
+        printf("Operation: slt\n");
+    }
+
+    else if ((strcmp(F[2], "011") == 0) && (strcmp(F[5], "0000000") == 0)){ // sltu
+        printf("Operation: sltu\n");
+    }
+
+    else if ((strcmp(F[2], "101") == 0) && (strcmp(F[5], "0100000") == 0)){ // sra
+        printf("Operation: sra\n");
+    }
+
+    else if ((strcmp(F[2], "101") == 0) && (strcmp(F[5], "0000000") == 0)){ // srl
+        printf("Operation: srl\n");
+    }
+
+    else if ((strcmp(F[2], "000") == 0) && (strcmp(F[5], "0100000") == 0)){ // sub
+        printf("Operation: sub\n");
+    }
+
+    else if ((strcmp(F[2], "100") == 0) && (strcmp(F[5], "0000000") == 0)){ // xor
+        printf("Operation: xorl\n");
+    }
+
+    printf("Rs1: %c%d\n", 'x',binary_to_dec(F[3]));
+    printf("Rs2: %c%d\n", 'x',binary_to_dec(F[4]));
+    printf("Rd: %c%d\n", 'x',binary_to_dec(F[1]));
     printf("Funct3: %d\n", binary_to_dec(F[2]));
     printf("Funct7: %d\n", binary_to_dec(F[5]));
 }
@@ -121,8 +163,8 @@ void decode_instruction_fields(char** F){
 
 
 int main(){
-    // char* test = "00000000001100100000001010110011";//R
-    char* test = "11111110001100100000100000100011";//S
+    char* test = "00000000001100100000001010110011";//R
+    // char* test = "11111110001100100000100000100011";//S
     printf("input: %s\n",test);
     char** F = splitter(test);
     decode_instruction_fields(F);
