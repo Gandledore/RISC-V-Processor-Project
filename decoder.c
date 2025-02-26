@@ -12,11 +12,11 @@ char* slice(char* input,int start,int end){
 }
 
 
-int binary_to_dec(char* num, int len){
+int binary_to_dec(char* num){
     int digit = 0;
-    for (int i = 0; i < len; i++){
-        digit += (num[i] == '1');
+    for (int i = 0; i < strlen(num); i++){
         digit = digit << 1;
+        digit += (num[i] == '1');
     }
 
     return digit;
@@ -76,27 +76,55 @@ char** splitter(char* input){
     return F;
 }
 
+void decode_S(char** F){
+    char imm[12];
+    strcpy(imm,F[5]);
+    strcat(imm,F[1]);
+    int immediate = binary_to_dec(imm);
+    if(immediate & 0x800){
+        immediate |= 0xFFFFF000;
+    }
+    printf("Instruction Type: S\n");
+    printf("Operation: sb\n");                 //add to this
+    printf("Rs1: x%d\n", binary_to_dec(F[3]));
+    printf("Rs2: x%d\n", binary_to_dec(F[4]));
+    printf("Immediate: %d\n",immediate);
+}
 
-void print_R(char** F){
+
+void decode_R(char** F){
     printf("Instruction Type: R\n");
 
     if (strcmp(F[3], "000") == 0){ // add
         printf("Operation: add\n");
     }
-    printf("Rs1: %c%d\n", 'x', binary_to_dec(F[2], 5));
-    printf("Rs2: %c%d\n", 'x', binary_to_dec(F[4], 5));
-    printf("Rd: %c%d\n", 'x', binary_to_dec(F[1], 5));
-    printf("Funct3: %c\n", binary_to_dec(F[3], 3));
-    printf("Funct7: %c\n", binary_to_dec(F[5], 7));
+    printf("Rs1: %d\n", binary_to_dec(F[3]));
+    printf("Rs2: %d\n", binary_to_dec(F[4]));
+    printf("Rd: %d\n", binary_to_dec(F[1]));
+    printf("Funct3: %d\n", binary_to_dec(F[2]));
+    printf("Funct7: %d\n", binary_to_dec(F[5]));
+}
+
+void decode_instruction_fields(char** F){
+    switch(*F[0]){
+        case 'R':
+            decode_R(F);
+            break;
+        case 'S':
+            decode_S(F);
+            break;
+        default:
+            printf("Type: %c not implemented",*F[0]);
+            break;
+    }
 }
 
 
 int main(){
-    char* test = "00000000001100100000001010110011";
-    // printf("input: %s\n",test);
+    // char* test = "00000000001100100000001010110011";//R
+    char* test = "11111110001100100000100000100011";//S
+    printf("input: %s\n",test);
     char** F = splitter(test);
-    if (*F[0] == 'R'){
-        print_R(F);
-    }
+    decode_instruction_fields(F);
     return 0;
 }
