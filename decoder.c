@@ -166,6 +166,32 @@ void decode_R(char** F){
     printf("Funct7: %d\n", binary_to_dec(F[5]));
 }
 
+
+void decode_UJ(char** F){
+    //unscramble immediate field
+    char imm[21];
+    imm[0] = F[2][0];
+    for(int i=1;i<11;i++){
+        imm[9+i]=F[2][i];
+    }
+    imm[9] = F[2][11];
+    for(int i=12;i<20;i++){
+        imm[i-11] = F[2][i];
+    }
+    imm[20] = 0;
+    int immediate = binary_to_dec(imm);
+    if(immediate & 0x80000){
+        immediate |= 0xFFF00000;
+    }
+    immediate = immediate<<1;
+    
+    printf("Instruction Type: UJ\n");
+    printf("Operation: jal\n");
+    printf("Rd: x%d\n",binary_to_dec(F[1]));
+    printf("Immediate: %d\n",immediate);
+
+}
+
 void decode_instruction_fields(char** F){
     switch(*F[0]){
         case 'R':
@@ -174,8 +200,11 @@ void decode_instruction_fields(char** F){
         case 'S':
             decode_S(F);
             break;
+        case 'J':
+            decode_UJ(F);
+            break;
         default:
-            printf("Type: %c not implemented",*F[0]);
+            printf("Type: %c not implemented\n",*F[0]);
             break;
     }
 }
@@ -183,7 +212,8 @@ void decode_instruction_fields(char** F){
 
 int main(){
     // char* test = "00000000001100100000001010110011";//R
-    char* test = "11111110001100100000100000100011";//S
+    // char* test = "11111110001100100000100000100011";//S
+    char* test = "00000000101000000000000011101111";//UJ
     printf("input: %s\n",test);
     char** F = splitter(test);
     decode_instruction_fields(F);
