@@ -11,7 +11,7 @@ using namespace std;
 
 int slice(int input,int start,int end,bool extend=false){//end is left bit index, start is right bit index
     int left = 8*sizeof(int)-end-1;
-    input = input << left;
+    input = input << left; // shifting to the left to get rid of bits that we don't want 
     if (extend){
         return input >> (left+start);
     }
@@ -59,7 +59,7 @@ int* splitter(int instruction){
     else if(opcode == 0b1100011){//SB
         type = SB;
     }
-    else if(opcode == 0b000011 || opcode == 0b0001111 || opcode == 0b0010011 || opcode == 0b0011011 || opcode == 0b1100111 || opcode == 0b1110011){ //I
+    else if(opcode == 0b0000011 || opcode == 0b0001111 || opcode == 0b0010011 || opcode == 0b0011011 || opcode == 0b1100111 || opcode == 0b1110011){ //I
         type = I;
     }
     
@@ -68,7 +68,7 @@ int* splitter(int instruction){
         F[i]=0;
     }
     F[0] = type; // putting instruction type into the value at F[0] address 
-    F[6] = opcode;
+    F[6] = opcode; // last field is opcode
 
     F[1] = slice(instruction, 7, 11); // R,I: rd | S: imm[4:0] | SB: [imm[4:1|11]])
 
@@ -121,7 +121,6 @@ void decode_S(int* F){
     cout << "Immediate: " << immediate << endl;
 }
 
-// R: add and or sll slt sltu sra srl sub xor
 void decode_R(int* F){
     cout << "Instruction Type: R" << endl;
 
@@ -224,6 +223,76 @@ void decode_UJ(int* F){
     cout << "Immediate: " << immediate << endl;
 }
 
+
+void decode_I(int* F){
+    // F[1]: rd / F[4]: imm / F[2]: funct3 / F[3]: rs1
+    
+    cout << "Instruction Type: I" << endl;
+    string operation = "l?";
+
+    if (F[6] == 0b0000011){
+        switch(F[2]){
+            case 0x0: // lb
+                operation[1] = 'b';
+                break;
+            case 0x1: // lh
+                operation[1] = 'h';
+                break;
+            case 0x2: // lw
+                operation[1] = 'w';
+                break;
+            default:
+                cout << "Undefined behavior for func3 in I type" << endl;
+        }
+        cout << "Operation: " << operation << endl;
+    }
+
+    else if (F[6] == 0b1100111 && F[2] == 0x0){ // jalr
+        cout << "Operation: jalr" << endl;
+    }
+    // I: andi addi jalr ori slli slti sltiu srai srli xori
+    else if (F[6] == 0b0010011 && F[2]==0b111){ // andi
+        cout << "Operation: andi" << endl;
+    }
+
+    else if (F[6] == 0b0010011 && F[2] == 0x0){ // addi
+        cout << "Operation: addi" << endl;
+    }
+
+    else if (F[6] == 0b0010011 && F[2] == 0b110){ // ori
+        cout << "Operation: ori" << endl;
+    }
+
+    else if (F[6] == 0b0010011 && F[2] == 0b010){ // stli
+        cout << "Operation: slti" << endl;
+    }
+
+    else if (F[6] == 0b0010011 && F[2] == 0b011){ // stliu
+        cout << "Operation: sltiu" << endl;
+    }
+
+    else if (F[6] == 0b0010011 && F[2] == 0b100){ // xori
+        cout << "Operation: xori" << endl;
+    }
+
+    else if (F[6] == 0b0010011 && F[2] == 0x1 && F[4] == 0x0){ // slli
+        cout << "Operation: slli" << endl;
+    }
+
+    else if (F[6] == 0b0010011 && F[2] == 0b101 && F[4] == 0x64){ // srai
+        cout << "Operation: srai" << endl;
+    }
+
+    else if (F[6] == 0b0010011 && F[2] == 0b101 && F[4] == 0x0){ // srli
+        cout << "Operation: srli" << endl;
+    }
+
+    cout << "Rs1: x" << F[3] << endl;
+    cout << "Rd: x" << F[1] << endl;
+    cout << "Funct3: " << F[2] << endl;
+    cout << "Immediate: " << F[4] << endl;
+}
+
 void decode_instruction_fields(int* F){
     switch(F[0]){
         case R:
@@ -238,6 +307,9 @@ void decode_instruction_fields(int* F){
         case SB:
             decode_SB(F);
             break;
+        case I:
+            decode_I(F);
+            break;
         default:
             cout << "Unable to decode. Instruction type not implemented." << endl;
             break;
@@ -248,8 +320,9 @@ void decode_instruction_fields(int* F){
 int main(){
     // string test = "00000000001100100000001010110011";//R
     // string test = "11111110001100100000100000100011";//S
+    string test = "00000000101001100111011010010011";
     // string test = "00000000101000000000000011101111";//UJ
-    string test = "00000001111000101001001101100011";//SB
+    // string test = "00000001111000101001001101100011";//SB
     cout << "input: " << test << endl;
     int instruction = binary_to_dec(test);
     int* F = splitter(instruction);
