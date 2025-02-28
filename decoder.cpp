@@ -9,6 +9,7 @@
 
 using namespace std;
 
+
 //slices binary number 'input', moves it all the way to the right
 int slice(int input,int start,int end,bool sign_extend=false){//end is left bit index, start is right bit index
     int left = 8*sizeof(int)-end-1;
@@ -21,6 +22,7 @@ int slice(int input,int start,int end,bool sign_extend=false){//end is left bit 
     }
 }
 
+
 int binary_to_dec(string num){
     int digit = 0;
     for (int i = 0; i < num.length(); i++){
@@ -29,6 +31,7 @@ int binary_to_dec(string num){
     }
     return digit;
 }
+
 
 enum instruction_type{//starts counting at 0
     nil,
@@ -39,6 +42,7 @@ enum instruction_type{//starts counting at 0
     U,
     UJ
 };
+
 
 int* splitter(int instruction){
     int opcode = slice(instruction, 0, 6); // bits [6:0]
@@ -97,7 +101,7 @@ int* splitter(int instruction){
         F[2] = slice(instruction,12,14); // funct3
         F[3] = slice(instruction,15,19); // rs1
         if(type==I){
-            F[4] = slice(instruction,0,11,true); // imm
+            F[4] = slice(instruction,20,31,true); // imm
         }
         else if(type==R || type==S || type==SB){
             F[4] = slice(instruction,20,24); // rs2
@@ -110,6 +114,7 @@ int* splitter(int instruction){
 
     return F;
 }
+
 
 void decode_S(int* F){
     int immediate = (F[5]<<5) + F[1];
@@ -138,6 +143,7 @@ void decode_S(int* F){
     cout << "Rs2: x" << F[4] << endl;
     cout << "Immediate: " << immediate << endl;
 }
+
 
 void decode_R(int* F){
     cout << "Instruction Type: R" << endl;
@@ -189,6 +195,7 @@ void decode_R(int* F){
     cout << "Funct7: " << F[5] << endl;
 }
 
+
 void decode_SB(int* F){
     int immediate = (F[5]<<5)+F[1];
     int bit11 = (immediate%2) << 11;  //move bit 11 to correct position
@@ -225,6 +232,7 @@ void decode_SB(int* F){
     cout << "Rs2: x" <<  F[4] << endl;
     cout << "Immediate: " << immediate << endl;
 }
+
 
 void decode_UJ(int* F){
     //unscramble immediate field
@@ -307,9 +315,9 @@ void decode_I(int* F){
 
     cout << "Rs1: x" << F[3] << endl;
     cout << "Rd: x" << F[1] << endl;
-    cout << "Funct3: " << F[2] << endl;
     cout << "Immediate: " << F[4] << endl;
 }
+
 
 void decode_instruction_fields(int* F){
     switch(F[0]){
@@ -338,13 +346,33 @@ void decode_instruction_fields(int* F){
 int main(){
     // string test = "00000000001100100000001010110011";//R
     // string test = "11111110001100100000100000100011";//S
-    string test = "00000000101001100111011010010011";
+    // string test = "00000000101001100111011010010011"; // I
     // string test = "00000000101000000000000011101111";//UJ
     // string test = "00000001111000101001001101100011";//SB
-    cout << "input: " << test << endl;
-    int instruction = binary_to_dec(test);
-    int* F = splitter(instruction);
-    decode_instruction_fields(F);
-    delete[] F;
+
+    /**
+        R  | 00000000001100100000001010110011
+        S  | 11111110001100100000100000100011
+        I  | 00000000101001100111011010010011
+        UJ | 00000000101000000000000011101111
+        SB | 00000001111000101001001101100011
+    */
+    bool loop = true;
+    string bin_inst = "";
+    char ans = 'Y';
+    while(loop) {
+        cout << "Enter an instruction: ";
+        cin >> bin_inst;
+        cout << endl;
+        int* F = splitter(binary_to_dec(bin_inst));
+        decode_instruction_fields(F);
+        delete[] F;
+
+        cout << endl;
+        cout << "Would you like to continue (Y/N)?: ";
+        cin >> ans;
+        loop = (ans == 'Y') ? true : false;
+        cout << endl;
+    }
     return 0;
 }
