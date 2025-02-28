@@ -9,27 +9,28 @@
 
 using namespace std;
 
-int slice(int input,int start,int end,bool extend=false){//end is left bit index, start is right bit index
+//slices binary number 'input', moves it all the way to the right
+int slice(int input,int start,int end,bool sign_extend=false){//end is left bit index, start is right bit index
     int left = 8*sizeof(int)-end-1;
-    input = input << left; // shifting to the left to get rid of bits that we don't want 
-    if (extend){
-        return input >> (left+start);
+    input = input << left;
+    if (sign_extend){
+        return input >> (left+start);//sign extend
     }
     else{
-        return static_cast<unsigned int>(input) >> (left+start);
+        return static_cast<unsigned int>(input) >> (left+start);//don't sign extend
     }
 }
 
 int binary_to_dec(string num){
     int digit = 0;
     for (int i = 0; i < num.length(); i++){
-        digit = digit << 1;
-        digit += (num[i] == '1');
+        digit = digit << 1;         //bit shifts left to make room for next bit
+        digit += (num[i] == '1');//adds a 1 to the end of the binary number if it is a 1, otherwise its a 0 so it adds 0
     }
     return digit;
 }
 
-enum instruction_type{
+enum instruction_type{//starts counting at 0
     nil,
     R,
     I,
@@ -41,32 +42,49 @@ enum instruction_type{
 
 int* splitter(int instruction){
     int opcode = slice(instruction, 0, 6); // bits [6:0]
-    cout << "opcode: " << bitset<7>(opcode) << endl;
+    // cout << "opcode: " << bitset<7>(opcode) << endl;
     
-    instruction_type type = nil; // default if instruction type isn't found
-    if(opcode == 0b1101111){//UJ
-        type = UJ;
-    }
-    else if(opcode == 0b0010111 || opcode == 0b0110111) {//U
-        type = U;
-    }
-    else if(opcode == 0b0100011){//S
-        type = S;
-    }
-    else if(opcode == 0b0110011 || opcode == 0b0111011){//R
-        type = R;
-    }
-    else if(opcode == 0b1100011){//SB
-        type = SB;
-    }
-    else if(opcode == 0b0000011 || opcode == 0b0001111 || opcode == 0b0010011 || opcode == 0b0011011 || opcode == 0b1100111 || opcode == 0b1110011){ //I
-        type = I;
+    instruction_type type = nil; // Default if instruction type isn't found
+
+    switch(opcode) {
+        case 0b1101111:
+            type = UJ;
+            break;
+            
+        case 0b0010111:
+        case 0b0110111:
+            type = U;
+            break;
+            
+        case 0b0100011:
+            type = S;
+            break;
+            
+        case 0b0110011:
+        case 0b0111011:
+            type = R;
+            break;
+            
+        case 0b1100011:
+            type = SB;
+            break;
+            
+        case 0b000011:
+        case 0b0001111:
+        case 0b0010011:
+        case 0b0011011:
+        case 0b1100111:
+        case 0b1110011:
+            type = I;
+            break;
+            
+        default:
+            type = nil;
     }
     
     int* F = new int[7]; //6-vector for fields of any instruction (some may be unused, depending on instruction) 
-    for(int i=0;i<7;i++){
-        F[i]=0;
-    }
+    // for(int i=0;i<7;i++){F[i]=0;}//ensure all fields start as 0
+    
     F[0] = type; // putting instruction type into the value at F[0] address 
     F[6] = opcode; // last field is opcode
 
