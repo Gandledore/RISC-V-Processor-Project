@@ -240,7 +240,7 @@ void decode_UJ(int* F){
     int bits19_12 = (field & 0xFF) << 12; //only keep right 8 bits, shift to correct position
     int bit11 = (field & 0x00000100) << 3; // only keep bit 11 (pos 8), shift to correct position
     int bits10_1 = (field & 0x0007FE00) >> 8; //keep middle bits, shift to correct position
-    int bit20 = field & 0xFFF80000; //keep 20th bit (in pos 19) and everything left of it
+    int bit20 = (field & 0xFFF80000)<<1; //keep 20th bit (in pos 19) and everything left of it
     int immediate = bit20+bits10_1+bit11+bits19_12;
     
     cout << "Instruction Type: UJ" << endl;
@@ -357,10 +357,9 @@ int main(){
         UJ | 00000000101000000000000011101111
         SB | 00000001111000101001001101100011
     */
-    bool loop = true;
     string bin_inst = "";
     char ans = 'Y';
-    while(loop) {
+    while(ans == 'Y') {
         cout << "Enter an instruction: ";
         cin >> bin_inst;
         cout << endl;
@@ -371,7 +370,6 @@ int main(){
         cout << endl;
         cout << "Would you like to continue (Y/N)?: ";
         cin >> ans;
-        loop = (ans == 'Y') ? true : false;
         cout << endl;
     }
     return 0;
