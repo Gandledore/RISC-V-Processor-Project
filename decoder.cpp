@@ -2,10 +2,6 @@
 #include <string>
 #include <bitset>  // Include bitset header
 
-// I: lw andi addi jalr lb lh ori slli slti sltiu srai srli xori
-// S: sb sh sw
-// SB: beq bge blt bne
-// UJ: jal
 
 using namespace std;
 
@@ -147,47 +143,52 @@ void decode_S(int* F){
 
 void decode_R(int* F){
     cout << "Instruction Type: R" << endl;
+    int funct7 = F[5];
+    int funct3 = F[2];
+    string operation = "";
 
-    if (F[2]==0b000){ // add
-        cout << "Operation: add" << endl;
+    switch (funct7) {
+        case 0b0000000:
+            switch(funct3) {
+                case 0b00:
+                    operation = "add";
+                    break;
+                case 0b111:
+                    operation = "and";
+                    break;
+                case 0b110:
+                    operation = "or";
+                    break;
+                case 0b001:
+                    operation = "sll";
+                    break;
+                case 0b010:
+                    operation = "slt";
+                    break;
+                case 0b011:
+                    operation = "sltu";
+                    break;
+                case 0b101:
+                    operation = "srl";
+                    break;
+                case 0b100:
+                    operation = "xor";
+                    break;
+            }
+            break;
+        case 0b0100000:
+            switch(funct3) {
+                case 0b101:
+                    operation = "sra";
+                    break;
+                case 0b000:
+                    operation = "sub";
+                    break;
+            }
+            break;
     }
 
-    else if ((F[2]==0b111) && (F[5]==0b0000000)){ // and
-        cout << "Operation: and" << endl;
-    }
-
-    else if ((F[2]==0b110) && (F[5]==0b0000000)){ // or
-        cout << "Operation: or" << endl;
-    }
-
-    else if ((F[2]==0b001) && (F[5]==0b0000000)){ // sll
-        cout << "Operation: sll" << endl;
-    }
-
-    else if ((F[2]==0b010) && (F[5]==0b0000000)){ // slt
-        cout << "Operation: slt" << endl;
-    }
-
-    else if ((F[2]==0b011) && (F[5]==0b0000000)){ // sltu
-        cout << "Operation: sltu" << endl;
-    }
-
-    else if ((F[2]==0b101) && (F[5]==0b0100000)){ // sra
-        cout << "Operation: sra" << endl;
-    }
-
-    else if ((F[2]==0b101) && (F[5]==0b0000000)){ // srl
-        cout << "Operation: srl" << endl;
-    }
-
-    else if ((F[2]==0b000) && (F[5]==0b0100000)){ // sub
-        cout << "Operation: sub" << endl;
-    }
-
-    else if ((F[2]==0b100) && (F[5]==0b0000000)){ // xor
-        cout << "Operation: xorl" << endl;
-    }
-
+    cout << "Operation: " << operation << endl;
     cout << "Rs1: x" << F[3] << endl;
     cout << "Rs2: x" << F[4] << endl;
     cout << "Rd: x" << F[1] << endl;
@@ -252,67 +253,66 @@ void decode_UJ(int* F){
 
 void decode_I(int* F){
     // F[1]: rd / F[4]: imm / F[2]: funct3 / F[3]: rs1
-    
+    int opcode = F[6];
+    int funct3 = F[2];
     cout << "Instruction Type: I" << endl;
     string operation = "l?";
 
-    if (F[6] == 0b0000011){
-        switch(F[2]){
-            case 0x0: // lb
-                operation[1] = 'b';
-                break;
-            case 0x1: // lh
-                operation[1] = 'h';
-                break;
-            case 0x2: // lw
-                operation[1] = 'w';
-                break;
-            default:
-                cout << "Undefined behavior for func3 in I type" << endl;
-        }
-        cout << "Operation: " << operation << endl;
+    switch (opcode) {
+        case 0b0000011:
+            switch(funct3){
+                case 0x0: // lb
+                    operation[1] = 'b';
+                    break;
+                case 0x1: // lh
+                    operation[1] = 'h';
+                    break;
+                case 0x2: // lw
+                    operation[1] = 'w';
+                    break;
+                default:
+                    cout << "Undefined behavior for func3 in I type" << endl;
+            }
+            break;
+
+        case 0b0010011:
+            switch (funct3) {
+                case 0b111:
+                    operation = "andi";
+                    break;
+                case 0x0:
+                    operation = "addi";
+                    break;
+                case 0b110:
+                    operation = "ori";
+                    break;
+                case 0b010:
+                    operation = "stli";
+                    break;
+                case 0b011:
+                    operation = "stliu";
+                    break;
+                case 0b100:
+                    operation = "xori";
+                    break;
+            }
+            break;
     }
 
-    else if (F[6] == 0b1100111 && F[2] == 0x0){ // jalr
-        cout << "Operation: jalr" << endl;
-    }
-    // I: andi addi jalr ori slli slti sltiu srai srli xori
-    else if (F[6] == 0b0010011 && F[2]==0b111){ // andi
-        cout << "Operation: andi" << endl;
-    }
 
-    else if (F[6] == 0b0010011 && F[2] == 0x0){ // addi
-        cout << "Operation: addi" << endl;
-    }
-
-    else if (F[6] == 0b0010011 && F[2] == 0b110){ // ori
-        cout << "Operation: ori" << endl;
-    }
-
-    else if (F[6] == 0b0010011 && F[2] == 0b010){ // stli
-        cout << "Operation: slti" << endl;
-    }
-
-    else if (F[6] == 0b0010011 && F[2] == 0b011){ // stliu
-        cout << "Operation: sltiu" << endl;
-    }
-
-    else if (F[6] == 0b0010011 && F[2] == 0b100){ // xori
-        cout << "Operation: xori" << endl;
-    }
-
-    else if (F[6] == 0b0010011 && F[2] == 0x1 && F[4] == 0x0){ // slli
-        cout << "Operation: slli" << endl;
+    if (F[6] == 0b0010011 && F[2] == 0x1 && F[4] == 0x0){ // slli
+        operation = "slli";
     }
 
     else if (F[6] == 0b0010011 && F[2] == 0b101 && F[4] == 0x64){ // srai
-        cout << "Operation: srai" << endl;
+        operation = "srai";
     }
 
-    else if (F[6] == 0b0010011 && F[2] == 0b101 && F[4] == 0x0){ // srli
-        cout << "Operation: srli" << endl;
+    if (F[6] == 0b1100111 && F[2] == 0x0){ // jalr
+        operation = "jalr";
     }
 
+    cout << "Operation: " << operation << endl;
     cout << "Rs1: x" << F[3] << endl;
     cout << "Rd: x" << F[1] << endl;
     cout << "Immediate: " << F[4] << endl;
