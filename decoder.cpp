@@ -251,7 +251,7 @@ void decode_UJ(int* F){
     int immediate = bit20+bits10_1+bit11+bits19_12;     //combine everything
     
     cout << "Instruction Type: UJ" << endl;
-    cout << "Operation: jal" << endl;
+    cout << "Operation: " << "jal" << endl;
     cout << "Rd: x" << F[1] << endl;
     cout << "Immediate: " << immediate << endl;
 }
@@ -270,13 +270,13 @@ void decode_I(int* F){
         case 0b0000011:
             switch(funct3){
                 case 0x0: // lb
-                    operation[1] = 'b';
+                    operation = "lb";
                     break;
                 case 0x1: // lh
-                    operation[1] = 'h';
+                    operation = "lh";
                     break;
                 case 0x2: // lw
-                    operation[1] = 'w';
+                    operation = "lw";
                     break;
                 default:
                     cout << "Undefined behavior for funct3 in I type. (0b0000011)" << endl;
@@ -295,10 +295,10 @@ void decode_I(int* F){
                     operation = "ori";
                     break;
                 case 0b010:
-                    operation = "stli";
+                    operation = "slti";
                     break;
                 case 0b011:
-                    operation = "stliu";
+                    operation = "sltiu";
                     break;
                 case 0b100:
                     operation = "xori";
