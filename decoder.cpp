@@ -1,10 +1,8 @@
 #include <iostream>
 #include <string>
-#include <bitset>  // Include bitset header
 
 
 using namespace std;
-
 
 //slices binary number 'input', moves it all the way to the right
 int slice(int input,int start,int end,bool sign_extend=false){//end is left bit index, start is right bit index
@@ -42,7 +40,6 @@ enum instruction_type{//starts counting at 0
 
 int* splitter(int instruction){
     int opcode = slice(instruction, 0, 6); // bits [6:0]
-    // cout << "opcode: " << bitset<7>(opcode) << endl;
     
     instruction_type type = nil; // Default if instruction type isn't found
 
@@ -80,6 +77,8 @@ int* splitter(int instruction){
             
         default:
             type = nil;
+            cout << "Unkown type. Can't Split." << endl;
+            return 0;
     }
     
     int* F = new int[7]; //6-vector for fields of any instruction (some may be unused, depending on instruction) 
@@ -104,33 +103,30 @@ int* splitter(int instruction){
             F[5] = slice(instruction,25,31,type!=R); // R: funct7 | S,B: imm | (type!=R sign extends for S,SB imm fields)
         }
     }
-    // for(int i=0;i<7;i++){
-    //     cout << "F" << i  << ": " << bitset<32>(F[i]) <<endl;
-    // }
 
     return F;
 }
 
 
 void decode_S(int* F){
-    int immediate = (F[5]<<5) + F[1];
-
-    string operation = "s?";
-    switch(F[2]){
+    int immediate = (F[5]<<5) + F[1];// F[5] = imm[11:5] | F[1] = imm[4:0]
+    int funct3 = F[2];
+    string operation = "?";
+    switch(funct3){
         case 0x0:
-            operation[1] = 'b';
+            operation = 'sb';
             break;
         case 0x1:
-            operation[1] = 'h';
+            operation = 'sh';
             break;
         case 0x2:
-            operation[1] = 'w';
+            operation = 'sw';
             break;
         case 0x3:
-            operation[1] = 'd';
+            operation = 'sd';
             break;
         default:
-            cout << "Undefined behavior for func3 in S type" << endl;
+            cout << "Undefined behavior for funct3 in S type" << endl;
     }
 
     cout << "Instruction Type: S" << endl;
@@ -145,7 +141,7 @@ void decode_R(int* F){
     cout << "Instruction Type: R" << endl;
     int funct7 = F[5];
     int funct3 = F[2];
-    string operation = "";
+    string operation = "?";
 
     switch (funct7) {
         case 0b0000000:
@@ -174,6 +170,8 @@ void decode_R(int* F){
                 case 0b100:
                     operation = "xor";
                     break;
+                default:
+                    cout << "Undefined behavior for funct3 in R type" << endl;
             }
             break;
         case 0b0100000:
@@ -184,8 +182,12 @@ void decode_R(int* F){
                 case 0b000:
                     operation = "sub";
                     break;
+                default:
+                    cout << "Undefined behavior for funct3 in R type" << endl;
             }
             break;
+        default:
+            cout << "Undefined behavior for funct7 in R type" << endl;
     }
 
     cout << "Operation: " << operation << endl;
@@ -198,13 +200,15 @@ void decode_R(int* F){
 
 
 void decode_SB(int* F){
+    int funct3 = F[2];
     int immediate = (F[5]<<5)+F[1];
-    int bit11 = (immediate%2) << 11;  //move bit 11 to correct position
-    int bit12 = (immediate>>11)<<12;//move bit 12 to correct position (everything left of bit 12 is sign extended)
-    immediate = (((immediate>>1)&0x000003FF)<<1)+bit11+bit12;  //final bit is 0, then include other bits
+    int bit11 = (immediate%2) << 11;                            //take bit 0 move to bit 11
+    int bit12 = (immediate>>11)<<12;                            //move bit 11 and everything to the left to bit 12 and left (everything left of bit 12 is sign extended)
+    int main_bits = (immediate & 0x7FE);                        //suppress bit 0 (which is bit 11), only keep bits[10:1]
+    immediate = main_bits+bit11+bit12;                          //combine everything
     
     string operation;
-    switch(F[2]){
+    switch(funct3){
         case 0x0:
             operation = "beq";
             break;
@@ -224,7 +228,7 @@ void decode_SB(int* F){
             operation = "bgeu";
             break;
         default:
-            cout << "Undefined behavior for func3 in SB type" << endl;
+            cout << "Undefined behavior for funct3 in SB type" << endl;
     }
 
     cout << "Instruction Type: SB" << endl;
@@ -236,13 +240,15 @@ void decode_SB(int* F){
 
 
 void decode_UJ(int* F){
+    
     //unscramble immediate field
+    //imm[20|10:1|11|19:12]
     int field = F[2];
-    int bits19_12 = (field & 0xFF) << 12; //only keep right 8 bits, shift to correct position
-    int bit11 = (field & 0x00000100) << 3; // only keep bit 11 (pos 8), shift to correct position
-    int bits10_1 = (field & 0x0007FE00) >> 8; //keep middle bits, shift to correct position
-    int bit20 = (field & 0xFFF80000)<<1; //keep 20th bit (in pos 19) and everything left of it
-    int immediate = bit20+bits10_1+bit11+bits19_12;
+    int bits19_12 = (field & 0xFF) << 12;               //only keep bits [7:0], shift to [19:12]
+    int bit11 = (field & 0x00000100) << 3;              // only keep bit 8, shift to position 11
+    int bits10_1 = (field & 0x0007FE00) >> 8;           //keep [18:9], shift to [10:1], now bit 0
+    int bit20 = (field & 0xFFF80000)<<1;                //keep bits 19 and everything left of it, shift left to bit 20
+    int immediate = bit20+bits10_1+bit11+bits19_12;     //combine everything
     
     cout << "Instruction Type: UJ" << endl;
     cout << "Operation: jal" << endl;
@@ -255,8 +261,10 @@ void decode_I(int* F){
     // F[1]: rd / F[4]: imm / F[2]: funct3 / F[3]: rs1
     int opcode = F[6];
     int funct3 = F[2];
-    cout << "Instruction Type: I" << endl;
-    string operation = "l?";
+    int immediate = F[4];
+    int funct7 = immediate>>5;
+
+    string operation = "?";
 
     switch (opcode) {
         case 0b0000011:
@@ -271,7 +279,7 @@ void decode_I(int* F){
                     operation[1] = 'w';
                     break;
                 default:
-                    cout << "Undefined behavior for func3 in I type" << endl;
+                    cout << "Undefined behavior for funct3 in I type. (0b0000011)" << endl;
             }
             break;
 
@@ -280,7 +288,7 @@ void decode_I(int* F){
                 case 0b111:
                     operation = "andi";
                     break;
-                case 0x0:
+                case 0b000:
                     operation = "addi";
                     break;
                 case 0b110:
@@ -295,27 +303,48 @@ void decode_I(int* F){
                 case 0b100:
                     operation = "xori";
                     break;
+                case 0b001:
+                    if (funct7==0){
+                        operation = "slli";
+                        immediate &= 0x01F;
+                    }
+                    else{
+                        cout << "Undefined behavior for funct7 in I type. (0b0010011, 0b001)" << endl;
+                    }
+                    break;
+                case 0b101:
+                    if(funct7 == 0b0100000){
+                        operation = "srai";
+                        immediate &= 0x01F;
+                    }
+                    else if(funct7==0){
+                        operation = "srli";
+                        immediate &= 0x01F;
+                    }
+                    else{
+                        cout << "Undefined behavior for funct7 in I type. (0b0010011, 0b101)" << endl;
+                    }
+                    break;
+                default:
+                    cout << "Undefined behavior for funct3 in I type. (0b0010011)" << endl;
             }
             break;
+        case 0b1100111:
+            if (funct3==0){
+                operation = "jalr";
+            }
+            else{
+                cout << "Undefined behavior for funct3 in I type. (0b1100111)" << endl;
+            }
+            break;
+        //case 0b0011011://addiw,slliw,srliw,sraiw
     }
 
-
-    if (F[6] == 0b0010011 && F[2] == 0x1 && F[4] == 0x0){ // slli
-        operation = "slli";
-    }
-
-    else if (F[6] == 0b0010011 && F[2] == 0b101 && F[4] == 0x64){ // srai
-        operation = "srai";
-    }
-
-    if (F[6] == 0b1100111 && F[2] == 0x0){ // jalr
-        operation = "jalr";
-    }
-
+    cout << "Instruction Type: I" << endl;
     cout << "Operation: " << operation << endl;
     cout << "Rs1: x" << F[3] << endl;
     cout << "Rd: x" << F[1] << endl;
-    cout << "Immediate: " << F[4] << endl;
+    cout << "Immediate: " << immediate << endl;
 }
 
 
