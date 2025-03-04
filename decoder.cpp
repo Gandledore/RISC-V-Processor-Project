@@ -114,16 +114,16 @@ void decode_S(int* F){
     string operation = "?";
     switch(funct3){
         case 0x0:
-            operation = 'sb';
+            operation = "sb";
             break;
         case 0x1:
-            operation = 'sh';
+            operation = "sh";
             break;
         case 0x2:
-            operation = 'sw';
+            operation = "sw";
             break;
         case 0x3:
-            operation = 'sd';
+            operation = "sd";
             break;
         default:
             cout << "Undefined behavior for funct3 in S type" << endl;
