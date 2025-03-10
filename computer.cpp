@@ -5,7 +5,9 @@
 using namespace std;
 
 int main(){
-    Processor p("sample_part1.txt");
-    p.run();
+    Processor p(32,32);
+    if(p.load("sample_part1.txt")){
+        p.run();
+    }
     return 0;
 }

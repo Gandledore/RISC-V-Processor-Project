@@ -17,31 +17,42 @@ class Processor{
     int pc;
     //control signals;
     int rf[32];
-    int dmem[32];
-    int imem[32];
+    int* dmem;
+    int* imem;
+    int imem_size;
+    int dmem_size;
     public:
-    Processor(std::string filepath){//parse textfile, store to imem
+    Processor(int imem_size = 32, int dmem_size=32){//parse textfile, store to imem
+        this->imem_size = imem_size;
+        this->dmem_size = dmem_size;
+        dmem = new int[imem_size];
+        imem = new int[dmem_size];
+        for(int i=0;i<32;i++){
+            rf[i] = 0;
+        }
+        for(int i=0;i<dmem_size;i++){
+            dmem[i]=0;
+        }
+        for(int i=0;i<imem_size;i++){
+            imem[i]=0;
+        }
+        pc = 0;
+    }
+    bool load(std::string filepath){
         std::ifstream file(filepath);
         if (!file) {
             std::cerr << "Error opening file!" << std::endl;
-            return; // Exit with an error code
+            return false; // Exit with an error code
         }
-    
         std::string line;
-        for(int i=0;i<32;i++){
-            imem[i]=0;
-            dmem[i]=0;
-            rf[i] = 0;
-        }
         for(int i=0;i<32;i++){
             if(!std::getline(file, line)){
                 break;
             }
-            imem[i] = binary_to_dec(line.substr(0,line.size()-1));
+            imem[i] = binary_to_dec(line.substr(0,line.size()-1));//skips the newline character at thend
         }
-    
         file.close(); // Close the file
-        pc = 0;
+        return true;
     }
     void run(){
         int inst = fetch();
@@ -53,9 +64,13 @@ class Processor{
         }
     }
     int fetch(){
-        int inst = imem[pc];
-        pc+=1;
+        int inst = imem[pc/4];
+        pc+=4;
         return inst;
+    }
+    ~Processor(){
+        delete[] dmem;
+        delete[] imem;
     }
     
 };
