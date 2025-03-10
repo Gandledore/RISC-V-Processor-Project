@@ -28,6 +28,30 @@ struct Instruction{
     ~Instruction() {
         delete[] Fields;
     }
+
+    void decode_instruction_fields(){
+        switch(Fields[0]){
+            case R:
+                decode_R();
+                break;
+            case S:
+                decode_S();
+                break;
+            case UJ:
+                decode_UJ();
+                break;
+            case SB:
+                decode_SB();
+                break;
+            case I:
+                decode_I();
+                break;
+            default:
+                std::cout << "Unable to decode. Instruction type not implemented." << std::endl;
+                break;
+        }
+    }
+    
     private:
 
     //slices binary number 'input', moves it all the way to the right
@@ -350,30 +374,6 @@ struct Instruction{
         std::cout << "Rs1: x" << Fields[3] << std::endl;
         std::cout << "Rd: x" << Fields[1] << std::endl;
         std::cout << "Immediate: " << immediate << std::endl;
-    }
-    
-    
-    void decode_instruction_fields(){
-        switch(Fields[0]){
-            case R:
-                decode_R();
-                break;
-            case S:
-                decode_S();
-                break;
-            case UJ:
-                decode_UJ();
-                break;
-            case SB:
-                decode_SB();
-                break;
-            case I:
-                decode_I();
-                break;
-            default:
-                std::cout << "Unable to decode. Instruction type not implemented." << std::endl;
-                break;
-        }
     }
 };
 
