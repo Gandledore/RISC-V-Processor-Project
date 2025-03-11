@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <cstring>
 #include <fstream>
 #include "instruction.h"
 #include <bitset>
@@ -56,15 +57,9 @@ class Processor{
         dmem = new int[imem_size];
         imem = new int[dmem_size];
 
-        for(int i=0;i<32;i++){
-            rf[i] = 0;
-        }
-        for(int i=0;i<dmem_size;i++){
-            dmem[i]=0;
-        }
-        for(int i=0;i<imem_size;i++){
-            imem[i]=0;
-        }
+        memset(rf, 0, sizeof(rf));
+        memset(dmem, 0, sizeof(dmem));
+        memset(imem, 0, sizeof(imem));
 
         //sample_1 initial state
         rf[1]=0x20; rf[2]=0x5;  rf[10]=0x70;    rf[11]=0x4;
