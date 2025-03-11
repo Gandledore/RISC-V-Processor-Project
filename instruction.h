@@ -2,6 +2,15 @@
 #include <bitset>
 #include <string>
 
+struct decoded_data{
+    int opcode;
+    int read_register_1;
+    int read_register_2;
+    int write_register;
+    int immediate;
+    int alu_control;
+};
+
 struct Instruction{
     int instruction;
     int* Fields;
@@ -21,14 +30,53 @@ struct Instruction{
         Fields = splitter();
     }
 
-    void decode() {
-        decode_instruction_fields();
+    decoded_data decode(){
+        decoded_data data;
+        data.opcode = slice(0,6,false);//opcode
+        data.read_register_1 = slice(15,19,false);//read register 1
+        data.read_register_2 = slice(20,24,false);//read register 2
+        data.write_register = slice(7,11,false);//write register
+        int immediate = 0;
+        switch(Fields[0]){
+            case S:{
+                immediate = (Fields[5]<<5) + Fields[1];// F[5] = imm[11:5] | F[1] = imm[4:0]
+                break;
+            }
+            case SB:{
+                immediate = (Fields[5]<<5)+Fields[1];
+                int bit11 = (immediate%2) << 11;                            //take bit 0 move to bit 11
+                int bit12 = (immediate>>11)<<12;                            //move bit 11 and everything to the left to bit 12 and left (everything left of bit 12 is sign extended)
+                int main_bits = (immediate & 0x7FE);                        //suppress bit 0 (which is bit 11), only keep bits[10:1]
+                immediate = main_bits+bit11+bit12;                          //combine everything
+                break;
+            }
+            case U:{
+                immediate = slice(12,31,true);
+                break;
+            }
+            case UJ:{
+                int field = Fields[2];
+                int bits19_12 = (field & 0xFF) << 12;               //only keep bits [7:0], shift to [19:12]
+                int bit11 = (field & 0x00000100) << 3;              // only keep bit 8, shift to position 11
+                int bits10_1 = (field & 0x0007FE00) >> 8;           //keep [18:9], shift to [10:1], now bit 0
+                int bit20 = (field & 0xFFF80000)<<1;                //keep bits 19 and everything left of it, shift left to bit 20
+                immediate = bit20+bits10_1+bit11+bits19_12;     //combine everything
+                break;
+            }
+            case I:{
+                immediate = Fields[4];
+                break;
+            }
+            default:{
+                immediate = 0;
+                break;
+            }
+        }
+        data.immediate = immediate;
+        data.alu_control = (slice(12,14,false)<<1)+slice(30,30,false);//alu control
+        return data;
     }
-
-    ~Instruction() {
-        delete[] Fields;
-    }
-
+    
     void decode_instruction_fields(){
         switch(Fields[0]){
             case R:
@@ -50,6 +98,10 @@ struct Instruction{
                 std::cout << "Unable to decode. Instruction type not implemented." << std::endl;
                 break;
         }
+    }
+
+    ~Instruction() {
+        delete[] Fields;
     }
     
     private:
