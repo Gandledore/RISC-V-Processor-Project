@@ -144,6 +144,24 @@ class Processor{
         }
         return;
     }
+    int Mem(int read_reg2_data, int alu_result){
+        int address = alu_result/4;
+        int mem_read_data;
+        if(control_signals.MemRead){
+            mem_read_data = dmem[address];
+        }
+        if(control_signals.MemWrite){
+            dmem[address] = read_reg2_data;
+        }
+        return mem_read_data;
+    }
+    void Write(int write_reg, int alu_result, int mem_read_data){
+        int write_data = control_signals.MemToReg ? mem_read_data : alu_result;
+        if(control_signals.RegWrite){
+            rf[write_reg] = write_data;
+        }
+        return;
+    }
     ~Processor(){
         delete[] dmem;
         delete[] imem;

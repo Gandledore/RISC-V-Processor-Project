@@ -158,11 +158,12 @@ struct Instruction{
                 
             default:
                 type = nil;
-                std::cout << "Unkown type. Can't Split." << std::endl;
+                std::cout << "Unkown opcode " << opcode << ". Can't Split." << std::endl;
                 return 0;
         }
         
         int* F = new int[7]; //6-vector for fields of any instruction (some may be unused, depending on instruction) 
+        memset(F, 0, 7 * sizeof(int));
         // for(int i=0;i<7;i++){F[i]=0;}//ensure all fields start as 0
         
         F[0] = type; // putting instruction type into the value at F[0] address 
