@@ -58,8 +58,8 @@ class Processor{
         imem = new int[dmem_size];
 
         memset(rf, 0, sizeof(rf));
-        memset(dmem, 0, sizeof(dmem));
-        memset(imem, 0, sizeof(imem));
+        memset(dmem, 0, dmem_size * sizeof(int));
+        memset(imem, 0, imem_size * sizeof(int));
 
         //sample_1 initial state
         rf[1]=0x20; rf[2]=0x5;  rf[10]=0x70;    rf[11]=0x4;
