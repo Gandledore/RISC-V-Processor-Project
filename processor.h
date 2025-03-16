@@ -52,7 +52,7 @@ class Processor{
     int dmem_size;
     int total_clock_cycles;
     bool program_loaded;
-    int max_pc;//last instruction address + 4
+    int max_pc;//last instruction address + sizeof(int)
 
     public:
     Processor(int imem_size = 32, int dmem_size=32){//set up instruction memory, data memory, and registers, and default tracking vars (pc, control_signals, total_clock_cycles, program_loaded)
@@ -95,7 +95,7 @@ class Processor{
             imem[i++] = string_to_binary(line.substr(0,line.size()-1));//-1 skips the newline character at thend
         }
         file.close();
-        max_pc=i*4;//last instruction address + 4
+        max_pc=i*sizeof(int);//last instruction address + sizeof(int)
         program_loaded=true;
         return true;//succes
     }
@@ -108,7 +108,7 @@ class Processor{
         for (int i = 0; i < max_size; i++) {
             // Instruction Memory
             if (i < imem_size) {
-                std::cout << "0x" << std::hex << std::setw(4) << i * 4 << ": " << std::bitset<32>(imem[i]) << " | ";
+                std::cout << "0x" << std::hex << std::setw(4) << i * sizeof(int) << ": " << std::bitset<32>(imem[i]) << " | ";
             } else {std::cout << std::setw(43) << " | ";}  // alignment
     
             // Registers
@@ -118,7 +118,7 @@ class Processor{
     
             // Data Memory
             if (i < dmem_size) {
-                std::cout << "0x" << std::hex << std::setw(4) << i * 4 << ": " << std::setw(4) << dmem[i];
+                std::cout << "0x" << std::hex << std::setw(4) << i * sizeof(int) << ": " << std::setw(4) << dmem[i];
             }
     
             std::cout << std::endl;
@@ -149,8 +149,8 @@ class Processor{
 
     private:
     int Fetch(){
-        int inst = imem[pc/sizeof(int)];//instruction memory is composed of ints so divide by 4
-        pc+=4;
+        int inst = imem[pc/sizeof(int)];//instruction memory is composed of ints so divide by sizeof(int)
+        pc+=sizeof(int);
         return inst;
     }
 
@@ -267,7 +267,7 @@ class Processor{
     }
 
     int Mem(int read_reg2_data, int alu_result){
-        int address = alu_result/sizeof(int); //data memory is composed of ints so divide by 4
+        int address = alu_result/sizeof(int); //data memory is composed of ints so divide by sizeof(int)
         int mem_read_data;
         if(control_signals.MemRead){
             mem_read_data = dmem[address];
