@@ -9,5 +9,6 @@ int main(){
     if(p.load("sample_part1.txt")){
         p.run();
     }
+    p.print();
     return 0;
 }
