@@ -43,6 +43,7 @@ std::ostream& operator<<(std::ostream& os,decoded_instruction& di){             
 class Processor{
     //program counter
     int pc;
+    int next_pc;
     ControlSignals control_signals;
     //data
     int rf[32];
@@ -143,14 +144,20 @@ class Processor{
             }
             std::cout << "pc is modified to 0x" << std::hex << pc << std::endl;
         }
-        std::cout << "Program Finished" << pc << " " << max_pc << std::endl;
+        if(pc==max_pc){
+            std::cout << "\nProgram Finished\n" << std::endl;
+        }
+        else{
+            std::cout << "Instruction Segmentation Fault" << std::endl;
+            std::cout << "pc: " << std::hex << pc << std::endl;
+        }
         return;
     }
 
     private:
     int Fetch(){
         int inst = imem[pc/sizeof(int)];//instruction memory is composed of ints so divide by sizeof(int)
-        pc+=sizeof(int);
+        next_pc = pc + sizeof(int);
         return inst;
     }
 
@@ -163,17 +170,19 @@ class Processor{
                                                 data.write_register, 
                                                 data.immediate, 
                                                 data.alu_control};
-        //early branch detection
-        //datapath mux version:
-            // int branch_target = pc + (instruction_data.immediate<<1);//calculate branch target adress, shift for instruction offset
-            // pc = (control_signals.Branch && (instruction_data.reg1_data==instruction_data.reg2_data)) ? branch_target : pc;//branch mux
-        //sequential logic version:
-        if(control_signals.Branch && instruction_data.reg1_data==instruction_data.reg2_data){
-            pc+=(instruction_data.immediate<<1);    //calculate branch target adress, shift for 2 byte instruction alignmnet
-            //Flush if Incorrect Branch Prediction
-        }
         
         //Stall Detection
+        
+        //early branch detection
+        //datapath mux version:
+            int branch_target = pc + (instruction_data.immediate<<1);//calculate branch target adress, shift for instruction offset
+            pc = (control_signals.Branch && (instruction_data.reg1_data==instruction_data.reg2_data)) ? branch_target : next_pc;//branch mux
+        //sequential logic version:
+        // if(control_signals.Branch && instruction_data.reg1_data==instruction_data.reg2_data){
+        //     pc+=(instruction_data.immediate<<1);    //calculate branch target adress, shift for 2 byte instruction alignmnet
+        //     //Flush if Incorrect Branch Prediction
+        // }
+        // else{pc = next_pc;}
         
         return instruction_data;
     }
@@ -287,5 +296,5 @@ class Processor{
             std::cout << "x" << std::dec << write_reg << " is modified to 0x" << std::hex << write_data << std::endl;
         }
         return;
-    }   
+    }
 };
