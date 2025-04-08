@@ -44,10 +44,10 @@ struct Instruction{
             }
             case SB:{
                 immediate = (Fields[5]<<5)+Fields[1];
-                int bit11 = (immediate%2) << 11;                            //take bit 0 move to bit 11
+                int bit11 = (Fields[1]%2) << 11;                            //take bit 0 move to bit 11
                 int bit12 = (immediate>>11)<<12;                            //move bit 11 and everything to the left to bit 12 and left (everything left of bit 12 is sign extended)
                 int main_bits = (immediate & 0x7FE);                        //suppress bit 0 (which is bit 11), only keep bits[10:1]
-                immediate = main_bits+bit11+bit12;                          //combine everything
+                immediate = main_bits|bit11|bit12;                          //combine everything
                 break;
             }
             case U:{
@@ -60,7 +60,7 @@ struct Instruction{
                 int bit11 = (field & 0x00000100) << 3;              // only keep bit 8, shift to position 11
                 int bits10_1 = (field & 0x0007FE00) >> 8;           //keep [18:9], shift to [10:1], now bit 0
                 int bit20 = (field & 0xFFF80000)<<1;                //keep bits 19 and everything left of it, shift left to bit 20
-                immediate = bit20+bits10_1+bit11+bits19_12;     //combine everything
+                immediate = bit20|bits10_1|bit11|bits19_12;     //combine everything
                 break;
             }
             case I:{
@@ -284,10 +284,10 @@ struct Instruction{
     void decode_SB(){
         int funct3 = Fields[2];
         int immediate = (Fields[5]<<5)+Fields[1];
-        int bit11 = (immediate%2) << 11;                            //take bit 0 move to bit 11
+        int bit11 = (Fields[1]%2) << 11;                            //take bit 0 move to bit 11
         int bit12 = (immediate>>11)<<12;                            //move bit 11 and everything to the left to bit 12 and left (everything left of bit 12 is sign extended)
         int main_bits = (immediate & 0x7FE);                        //suppress bit 0 (which is bit 11), only keep bits[10:1]
-        immediate = main_bits+bit11+bit12;                          //combine everything
+        immediate = main_bits|bit11|bit12;                          //combine everything
         
         std::string operation;
         switch(funct3){
@@ -330,7 +330,7 @@ struct Instruction{
         int bit11 = (field & 0x00000100) << 3;              // only keep bit 8, shift to position 11
         int bits10_1 = (field & 0x0007FE00) >> 8;           //keep [18:9], shift to [10:1], now bit 0
         int bit20 = (field & 0xFFF80000)<<1;                //keep bits 19 and everything left of it, shift left to bit 20
-        int immediate = bit20+bits10_1+bit11+bits19_12;     //combine everything
+        int immediate = bit20|bits10_1|bit11|bits19_12;     //combine everything
         
         std::cout << "Instruction Type: UJ" << std::endl;
         std::cout << "Operation: " << "jal" << std::endl;

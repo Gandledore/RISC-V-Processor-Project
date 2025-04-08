@@ -68,8 +68,14 @@ class Processor{
         memset(imem, 0, imem_size * sizeof(int));
 
         //sample_1 initial state
-        rf[1]=0x20; rf[2]=0x5;  rf[10]=0x70;    rf[11]=0x4;
-        dmem[0x70/sizeof(int)]=0x5;   dmem[0x74/sizeof(int)]=0x10;
+        // rf[1]=0x20; rf[2]=0x5;  rf[10]=0x70;    rf[11]=0x4;
+        // dmem[0x70/sizeof(int)]=0x5;   dmem[0x74/sizeof(int)]=0x10;
+
+        //sample_2 initial state
+        // rf[8]=0x20; rf[10]=0x5; rf[11]=0x2; rf[12]=0xa; rf[13]=0xf;
+
+        //test initial state
+        dmem[3]=1; dmem[4]=-3; dmem[5]=5; dmem[6]=2; dmem[7]=4;
 
         //tracking variables
         pc = 0;
