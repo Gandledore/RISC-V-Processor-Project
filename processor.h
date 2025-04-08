@@ -92,7 +92,7 @@ class Processor{
         std::string line;
         int i=0;
         while(i<imem_size && std::getline(file, line)){
-            //++ operator increments i after the value is used
+            //i++ operator increments i after the value is used
             imem[i++] = string_to_binary(line.substr(0,line.size()-1));//-1 skips the newline character at thend
         }
         file.close();
@@ -140,7 +140,7 @@ class Processor{
             int mem_read_data = Mem(instruction_data.reg2_data, alu_result);
             Write(instruction_data.write_register, alu_result, mem_read_data);
             if(control_signals.MemWrite){
-                std::cout << "memory 0x" << std::hex << alu_result/sizeof(int) << " is modified to " << std::hex << instruction_data.reg2_data << std::endl;
+                std::cout << "memory 0x" << std::hex << alu_result/sizeof(int) << " is modified to 0x" << std::hex << instruction_data.reg2_data << std::endl;
             }
             std::cout << "pc is modified to 0x" << std::hex << pc << std::endl;
         }

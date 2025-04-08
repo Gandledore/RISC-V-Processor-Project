@@ -158,7 +158,7 @@ struct Instruction{
                 
             default:
                 type = nil;
-                std::cout << "Unkown opcode " << opcode << ". Can't Split." << std::endl;
+                std::cout << "Unknown opcode " << std::bitset<7>(opcode) << ". Can't Split." << std::endl;
                 return 0;
         }
         
