@@ -92,8 +92,9 @@ class Processor{
         std::string line;
         int i=0;
         while(i<imem_size && std::getline(file, line)){
+            line = line.back()=='\r' ? line.substr(0, line.length()-1) : line; //remove \r if present (windows)
             //i++ operator increments i after the value is used
-            imem[i++] = string_to_binary(line.substr(0,line.size()-1));//-1 skips the newline character at thend
+            imem[i++] = string_to_binary(line);//convert string to binary and store in instruction memory
         }
         file.close();
         max_pc=i*sizeof(int);//last instruction address + sizeof(int)
