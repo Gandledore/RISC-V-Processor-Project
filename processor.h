@@ -22,6 +22,7 @@ struct ControlSignals {
     bool MemWrite;
     bool Branch;
     int ALUOp;
+    bool jump;
 };
 std::ostream& operator<<(std::ostream& os,ControlSignals& cs){                                                 //allows printing
     os << cs.ALUSrc << cs.MemToReg << cs.RegWrite << cs.MemRead << cs.MemWrite << cs.Branch << cs.ALUOp;
@@ -68,18 +69,18 @@ class Processor{
         memset(imem, 0, imem_size * sizeof(int));
 
         //sample_1 initial state
-        rf[1]=0x20; rf[2]=0x5;  rf[10]=0x70;    rf[11]=0x4;
-        dmem[0x70/sizeof(int)]=0x5;   dmem[0x74/sizeof(int)]=0x10;
+        // rf[1]=0x20; rf[2]=0x5;  rf[10]=0x70;    rf[11]=0x4;
+        // dmem[0x70/sizeof(int)]=0x5;   dmem[0x74/sizeof(int)]=0x10;
 
         //sample_2 initial state
-        // rf[8]=0x20; rf[10]=0x5; rf[11]=0x2; rf[12]=0xa; rf[13]=0xf;
+        rf[8]=0x20; rf[10]=0x5; rf[11]=0x2; rf[12]=0xa; rf[13]=0xf;
 
         //test initial state
         // dmem[3]=1; dmem[4]=-3; dmem[5]=5; dmem[6]=2; dmem[7]=4;
 
         //tracking variables
         pc = 0;
-        control_signals = {0,0,0,0,0,0,0};
+        control_signals = {0,0,0,0,0,0,0,0};
         total_clock_cycles = 0;
         program_loaded = false;
     }
@@ -183,7 +184,8 @@ class Processor{
         //early branch detection
         //datapath mux version:
             int branch_target = pc + instruction_data.immediate;//calculate branch target adress, instruction offset bit shift accounted for in decoding of immediate
-            pc = (control_signals.Branch && (instruction_data.reg1_data==instruction_data.reg2_data)) ? branch_target : next_pc;//branch mux
+            int jump_target = control_signals.Branch ? branch_target : instruction_data.reg1_data+instruction_data.immediate; //branch target mux
+            pc = (control_signals.jump || (control_signals.Branch && (instruction_data.reg1_data==instruction_data.reg2_data))) ? jump_target : next_pc;//branch mux
         //sequential logic version:
         // if(control_signals.Branch && instruction_data.reg1_data==instruction_data.reg2_data){
         //     pc+=(instruction_data.immediate<<1);    //calculate branch target adress, shift for 2 byte instruction alignmnet
@@ -199,21 +201,26 @@ class Processor{
         switch(opcode){
             case 0b0110011:
             case 0b0111011://R type
-                control_signals = {0,0,1,0,0,0,0b10};
+                control_signals = {0,0,1,0,0,0,0b10,0};
                 break;
             case 0b0100011://save
-                control_signals = {1,0,0,0,1,0,0b00};
+                control_signals = {1,0,0,0,1,0,0b00,0};
                 break;
             case 0b1100011://branch
-                control_signals = {0,0,0,0,0,1,0b01};
+                control_signals = {0,0,0,0,0,1,0b01,0};
                 break;
             case 0b0000011://load
-                control_signals = {1,1,1,1,0,0,0b00};
+                control_signals = {1,1,1,1,0,0,0b00,0};
                 break;
             case 0b010011://I type special i types not implemented (the ones that use funct7)
-                control_signals = {1,0,1,0,0,0,0b11};
+                control_signals = {1,0,1,0,0,0,0b11,0};
                 break;
-            //case jal,jalr not implemented
+            case 0b1101111://jal
+                control_signals = {0,0,1,0,0,1,0b00,1};
+                break;
+            case 0b1100111://jalr
+                control_signals = {0,0,1,0,0,0,0b00,1};
+                break;
             default:
                 std::cout << "Undefined Control Unit Behavior for opcode "<< std::bitset<7>(opcode) << std::endl;
         }
@@ -296,6 +303,7 @@ class Processor{
 
     void Write(int write_reg, int alu_result, int mem_read_data){
         int write_data = control_signals.MemToReg ? mem_read_data : alu_result;     //write back mux
+        write_data = control_signals.jump ? next_pc : write_data; //jump mux
         total_clock_cycles+=1;
         std::cout << "\ntotal_clock_cycles: " << std::dec << total_clock_cycles << std::endl;
         if(control_signals.RegWrite){
