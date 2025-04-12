@@ -73,10 +73,17 @@ class Processor{
         // dmem[0x70/sizeof(int)]=0x5;   dmem[0x74/sizeof(int)]=0x10;
 
         //sample_2 initial state
-        rf[8]=0x20; rf[10]=0x5; rf[11]=0x2; rf[12]=0xa; rf[13]=0xf;
+        // rf[8]=0x20; rf[10]=0x5; rf[11]=0x2; rf[12]=0xa; rf[13]=0xf;
 
-        //test initial state
-        // dmem[3]=1; dmem[4]=-3; dmem[5]=5; dmem[6]=2; dmem[7]=4;
+        //test initial state: expected output: 0x14 at memory 0x5c 
+        // dmem[3]=1; dmem[4]=-3; dmem[5]=5; dmem[6]=-2; dmem[7]=19;
+
+        //test2 initial state: expected output: 0x20 at memory 0x64
+        // dmem[5]=0xabc; dmem[6]=0xdef; dmem[7]=0x1234; dmem[8]=0x5678; dmem[9]=0x9abc;
+        // std::cout << std::hex << (dmem[5] & dmem[6] & dmem[7] & dmem[8] & dmem[9]) << std::endl;
+        
+        //test3 initial state: expected output 0x27a at memory 0x64
+        dmem[3] = 0x34; dmem[4] = 0x77; dmem[5] = 0x28; dmem[6] = 0xb6; dmem[7] = 0xf1;
 
         //tracking variables
         pc = 0;
@@ -179,12 +186,16 @@ class Processor{
                                                 data.immediate, 
                                                 data.alu_control};
         
+        if(data.write_register == 0){//if write register is 0, set to reg write signal to falseavoid writing to it
+            control_signals.RegWrite = false;
+        }
+
         //Stall Detection
         
         //early branch detection
         //datapath mux version:
             int branch_target = pc + instruction_data.immediate;//calculate branch target adress, instruction offset bit shift accounted for in decoding of immediate
-            int jump_target = control_signals.Branch ? branch_target : instruction_data.reg1_data+instruction_data.immediate; //branch target mux
+            int jump_target = control_signals.Branch ? branch_target : instruction_data.reg1_data+instruction_data.immediate; //jump target mux
             pc = (control_signals.jump || (control_signals.Branch && (instruction_data.reg1_data==instruction_data.reg2_data))) ? jump_target : next_pc;//branch mux
         //sequential logic version:
         // if(control_signals.Branch && instruction_data.reg1_data==instruction_data.reg2_data){
