@@ -73,7 +73,7 @@ class Processor{
         // dmem[0x70/sizeof(int)]=0x5;   dmem[0x74/sizeof(int)]=0x10;
 
         //sample_2 initial state
-        // rf[8]=0x20; rf[10]=0x5; rf[11]=0x2; rf[12]=0xa; rf[13]=0xf;
+        rf[8]=0x20; rf[10]=0x5; rf[11]=0x2; rf[12]=0xa; rf[13]=0xf;
 
         //test initial state: expected output: 0x14 at memory 0x5c 
         // dmem[3]=1; dmem[4]=-3; dmem[5]=5; dmem[6]=-2; dmem[7]=19;
@@ -83,7 +83,7 @@ class Processor{
         // std::cout << std::hex << (dmem[5] & dmem[6] & dmem[7] & dmem[8] & dmem[9]) << std::endl;
         
         //test3 initial state: expected output 0x27a at memory 0x64
-        dmem[3] = 0x34; dmem[4] = 0x77; dmem[5] = 0x28; dmem[6] = 0xb6; dmem[7] = 0xf1;
+        // dmem[3] = 0x34; dmem[4] = 0x77; dmem[5] = 0x28; dmem[6] = 0xb6; dmem[7] = 0xf1;
 
         //tracking variables
         pc = 0;
@@ -155,7 +155,7 @@ class Processor{
             int mem_read_data = Mem(instruction_data.reg2_data, alu_result);
             Write(instruction_data.write_register, alu_result, mem_read_data);
             if(control_signals.MemWrite){
-                std::cout << "memory 0x" << std::hex << alu_result/sizeof(int) << " is modified to 0x" << std::hex << instruction_data.reg2_data << std::endl;
+                std::cout << "memory 0x" << std::hex << alu_result << " is modified to 0x" << std::hex << instruction_data.reg2_data << std::endl;
             }
             std::cout << "pc is modified to 0x" << std::hex << pc << std::endl;
         }
@@ -237,6 +237,7 @@ class Processor{
         }
         return;
     }
+    
     enum ALU_Op{nil, ADD, SUB, AND, OR};
     ALU_Op ALU_Control(int alu_op, int alu_ctrl){
         //alu_control = instruction[12-14|30]
@@ -274,6 +275,7 @@ class Processor{
         }
         return alu_control;
     }
+    
     int Execute(int read_reg1_data, int read_reg2_data, int immediate, int alu_control){
         int alu_result;
         int input2 = control_signals.ALUSrc ? immediate : read_reg2_data; //ALU_Src mux

@@ -6,7 +6,7 @@ using namespace std;
 
 int main(){
     Processor p(32,32);
-    if(p.load("test_cases/binary_tests/test3.txt")){
+    if(p.load("test_cases/binary_tests/sample_part2.txt")){
         p.run();
     }
     p.print();
