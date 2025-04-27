@@ -155,7 +155,10 @@ struct Instruction{
             case 0b1110011:
                 type = I;
                 break;
-                
+            case 0b0000000:
+                type = nil;
+                std::cout << "NOP Instruction" << std::endl;
+                break;
             default:
                 type = nil;
                 std::cout << "Unknown opcode " << std::bitset<7>(opcode) << ". Can't Split." << std::endl;
