@@ -94,10 +94,14 @@ struct Instruction{
             case I:
                 decode_I();
                 break;
+            case nil:
+                std::cout << "NOP Instruction";
+                break;
             default:
-                std::cout << "Unable to decode. Instruction type not implemented." << std::endl;
+                throw std::runtime_error("Undefined Instruction Type Behavior for instruction type "+std::to_string(Fields[0]));
                 break;
         }
+        std::cout << " | ";
     }
 
     ~Instruction() {
@@ -157,11 +161,10 @@ struct Instruction{
                 break;
             case 0b0000000:
                 type = nil;
-                std::cout << "NOP Instruction" << std::endl;
                 break;
             default:
                 type = nil;
-                std::cout << "Unknown opcode " << std::bitset<7>(opcode) << ". Can't Split." << std::endl;
+                throw std::runtime_error("Unknown opcode " + std::bitset<7>(opcode).to_string() + ". Can't Split.");
                 return 0;
         }
         
@@ -211,19 +214,19 @@ struct Instruction{
                 operation = "sd";
                 break;
             default:
-                std::cout << "Undefined behavior for funct3 in S type" << std::endl;
+                throw std::runtime_error("Undefined behavior for funct3 in S type");
         }
     
-        std::cout << "Instruction Type: S" << std::endl;
-        std::cout << "Operation: " << operation << std::endl;
-        std::cout << "Rs1: x" << Fields[3] << std::endl;
-        std::cout << "Rs2: x" << Fields[4] << std::endl;
-        std::cout << "Immediate: " << immediate << std::endl;
+        // std::cout << "Instruction Type: S" << std::endl;
+        // std::cout << "Operation: " << operation << std::endl;
+        // std::cout << "Rs1: x" << Fields[3] << std::endl;
+        // std::cout << "Rs2: x" << Fields[4] << std::endl;
+        // std::cout << "Immediate: " << immediate << std::endl;
+        std::cout << operation << " x" << std::dec << Fields[3] << ", x" << Fields[4] << ", " << immediate;
     }
     
     
     void decode_R(){
-        std::cout << "Instruction Type: R" << std::endl;
         int funct7 = Fields[5];
         int funct3 = Fields[2];
         std::string operation = "?";
@@ -256,7 +259,7 @@ struct Instruction{
                         operation = "xor";
                         break;
                     default:
-                        std::cout << "Undefined behavior for funct3 in R type" << std::endl;
+                        throw std::runtime_error("Undefined behavior for funct3 in R type");
                 }
                 break;
             case 0b0100000:
@@ -268,19 +271,21 @@ struct Instruction{
                         operation = "sub";
                         break;
                     default:
-                        std::cout << "Undefined behavior for funct3 in R type" << std::endl;
+                        throw std::runtime_error("Undefined behavior for funct3 in R type");
                 }
                 break;
             default:
-                std::cout << "Undefined behavior for funct7 in R type" << std::endl;
+                throw std::runtime_error("Undefined behavior for funct7 in R type");
         }
     
-        std::cout << "Operation: " << operation << std::endl;
-        std::cout << "Rs1: x" << Fields[3] << std::endl;
-        std::cout << "Rs2: x" << Fields[4] << std::endl;
-        std::cout << "Rd: x" << Fields[1] << std::endl;
-        std::cout << "Funct3: " << Fields[2] << std::endl;
-        std::cout << "Funct7: " << Fields[5] << std::endl;
+        // std::cout << "Instruction Type: R" << std::endl;
+        // std::cout << "Operation: " << operation << std::endl;
+        // std::cout << "Rs1: x" << Fields[3] << std::endl;
+        // std::cout << "Rs2: x" << Fields[4] << std::endl;
+        // std::cout << "Rd: x" << Fields[1] << std::endl;
+        // std::cout << "Funct3: " << Fields[2] << std::endl;
+        // std::cout << "Funct7: " << Fields[5] << std::endl;
+        std::cout << operation << " x" << std::dec << Fields[1] << ", x" << Fields[3] << ", x" << Fields[4];
     }
     
     
@@ -313,14 +318,15 @@ struct Instruction{
                 operation = "bgeu";
                 break;
             default:
-                std::cout << "Undefined behavior for funct3 in SB type" << std::endl;
+                throw std::runtime_error("Undefined behavior for funct3 in SB type");
         }
     
-        std::cout << "Instruction Type: SB" << std::endl;
-        std::cout << "Operation: " << operation << std::endl;
-        std::cout << "Rs1: x" <<  Fields[3] << std::endl;
-        std::cout << "Rs2: x" <<  Fields[4] << std::endl;
-        std::cout << "Immediate: " << immediate << std::endl;
+        // std::cout << "Instruction Type: SB" << std::endl;
+        // std::cout << "Operation: " << operation << std::endl;
+        // std::cout << "Rs1: x" <<  Fields[3] << std::endl;
+        // std::cout << "Rs2: x" <<  Fields[4] << std::endl;
+        // std::cout << "Immediate: " << immediate << std::endl;
+        std::cout << operation << " x" << std::dec << Fields[3] << ", x" << Fields[4] << ", " << immediate;
     }
     
     
@@ -335,10 +341,11 @@ struct Instruction{
         int bit20 = (field & 0xFFF80000)<<1;                //keep bits 19 and everything left of it, shift left to bit 20
         int immediate = bit20|bits10_1|bit11|bits19_12;     //combine everything
         
-        std::cout << "Instruction Type: UJ" << std::endl;
-        std::cout << "Operation: " << "jal" << std::endl;
-        std::cout << "Rd: x" << Fields[1] << std::endl;
-        std::cout << "Immediate: " << immediate << std::endl;
+        // std::cout << "Instruction Type: UJ" << std::endl;
+        // std::cout << "Operation: " << "jal" << std::endl;
+        // std::cout << "Rd: x" << Fields[1] << std::endl;
+        // std::cout << "Immediate: " << immediate << std::endl;
+        std::cout << "jal x" << std::dec << Fields[1] << ", " << immediate;
     }
     
     
@@ -364,7 +371,7 @@ struct Instruction{
                         operation = "lw";
                         break;
                     default:
-                        std::cout << "Undefined behavior for funct3 in I type. (0b0000011)" << std::endl;
+                        throw std::runtime_error("Undefined behavior for funct3 in I type." + std::bitset<7>(opcode).to_string() + std::bitset<3>(funct3).to_string());
                 }
                 break;
     
@@ -394,7 +401,7 @@ struct Instruction{
                             immediate &= 0x01F;
                         }
                         else{
-                            std::cout << "Undefined behavior for funct7 in I type. (0b0010011, 0b001)" << std::endl;
+                            throw std::runtime_error("Undefined behavior for (opcode,funct7) in I type. (0b0010011, 0b001)");
                         }
                         break;
                     case 0b101:
@@ -407,11 +414,11 @@ struct Instruction{
                             immediate &= 0x01F;
                         }
                         else{
-                            std::cout << "Undefined behavior for funct7 in I type. (0b0010011, 0b101)" << std::endl;
+                            throw std::runtime_error("Undefined behavior for (opcode,funct7) in I type. (0b0010011, 0b101)");
                         }
                         break;
                     default:
-                        std::cout << "Undefined behavior for funct3 in I type. (0b0010011)" << std::endl;
+                        throw std::runtime_error("Undefined behavior for funct3 in I type. (0b0010011)");
                 }
                 break;
             case 0b1100111:
@@ -419,17 +426,18 @@ struct Instruction{
                     operation = "jalr";
                 }
                 else{
-                    std::cout << "Undefined behavior for funct3 in I type. (0b1100111)" << std::endl;
+                    throw std::runtime_error("Undefined behavior for funct3 in I type. (0b1100111)");
                 }
                 break;
             //case 0b0011011://addiw,slliw,srliw,sraiw
         }
     
-        std::cout << "Instruction Type: I" << std::endl;
-        std::cout << "Operation: " << operation << std::endl;
-        std::cout << "Rs1: x" << Fields[3] << std::endl;
-        std::cout << "Rd: x" << Fields[1] << std::endl;
-        std::cout << "Immediate: " << immediate << std::endl;
+        // std::cout << "Instruction Type: I" << std::endl;
+        // std::cout << "Operation: " << operation << std::endl;
+        // std::cout << "Rs1: x" << Fields[3] << std::endl;
+        // std::cout << "Rd: x" << Fields[1] << std::endl;
+        // std::cout << "Immediate: " << immediate << std::endl;
+        std::cout << operation << " x" << std::dec << Fields[1] << ", x" << Fields[3] << ", " << immediate;
     }
 };
 

@@ -3,11 +3,15 @@
 
 struct dependency{
     int buffer_index=0;//which buffer has the correct data
-    bool is_dependent=0;
+    int stage_needed=0;//which stage needs the data
+    bool is_dependent=0;//if there is actually a dependency
 };
 std::ostream& operator<<(std::ostream& os, dependency& d){
-    os << "Buffer Index: " << d.buffer_index << " | Dependent: " << d.is_dependent;
+    os << "(Buf: " << d.buffer_index << ", Need: " << d.stage_needed << ", Dep: " << d.is_dependent << ")";
     return os;
+}
+bool operator==(dependency& d1, dependency& d2){
+    return d1.buffer_index==d2.buffer_index && d1.stage_needed==d2.stage_needed && d1.is_dependent==d2.is_dependent;
 }
 
 struct fetch_buffer{
@@ -28,6 +32,9 @@ struct decode_buffer_control_signals{
     int ALUOp=0;
     bool ALUSrc=0;
 };
+bool operator==(decode_buffer_control_signals& cs1, decode_buffer_control_signals& cs2){
+    return cs1.jump==cs2.jump && cs1.RegWrite==cs2.RegWrite && cs1.MemToReg==cs2.MemToReg && cs1.MemRead==cs2.MemRead && cs1.MemWrite==cs2.MemWrite && cs1.ALUOp==cs2.ALUOp && cs1.ALUSrc==cs2.ALUSrc;
+}
 struct decode_buffer{
     decode_buffer_control_signals control_signals;//(Jump, RegWrite, MemToReg | MemRead, MemWrite | ALUOp, ALUSrc) for (write | mem | execute) stages
     int next_pc=0;
@@ -53,6 +60,9 @@ struct execute_buffer_control_signals{
     bool MemRead=0;
     bool MemWrite=0;
 };
+bool operator==(execute_buffer_control_signals& cs1, execute_buffer_control_signals& cs2){
+    return cs1.jump==cs2.jump && cs1.RegWrite==cs2.RegWrite && cs1.MemToReg==cs2.MemToReg && cs1.MemRead==cs2.MemRead && cs1.MemWrite==cs2.MemWrite;
+}
 struct execute_buffer{
     execute_buffer_control_signals control_signals;//(Jump, RegWrite, MemToReg | MemRead, MemWrite) for (write | mem) stages
     int next_pc=0;
@@ -74,6 +84,9 @@ struct mem_buffer_control_signals{
     bool RegWrite=0;
     bool MemToReg=0;
 };
+bool operator==(mem_buffer_control_signals& cs1, mem_buffer_control_signals& cs2){
+    return cs1.jump==cs2.jump && cs1.RegWrite==cs2.RegWrite && cs1.MemToReg==cs2.MemToReg;
+}
 struct mem_buffer{
     mem_buffer_control_signals control_signals;//(Jump, RegWrite, MemToReg) for (write) stage
     int next_pc=0;
