@@ -16,10 +16,10 @@ bool operator==(dependency& d1, dependency& d2){
 
 struct fetch_buffer{
     int instruction=0;
-    int next_pc=0;
+    int pc=0;
 };
 std::ostream& operator<<(std::ostream& os, fetch_buffer& fb){
-    os << "Instruction: " << std::bitset<32>(fb.instruction) << " | Next PC: " << fb.next_pc;
+    os << "Instruction: " << std::bitset<32>(fb.instruction) << " | PC: " << std::hex << fb.pc;
     return os;
 }
 
