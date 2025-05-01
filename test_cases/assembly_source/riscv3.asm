@@ -4,8 +4,8 @@
         addi t3, zero, 0         # t3 = running sum
 loop:   beq  t1, t2, done        # if index == 3, exit loop
         lw   t4, 0(t0)           # load value into t4
-        jal  process               # call process function (input in t4, result in t5)
-        add  t3, t3, t5         # sum += result
+        jal  process             # call process function (input in t4, result in t5)
+        add  t3, t3, t5          # sum += result
         addi t0, t0, 4           # next memory address
         addi t1, t1, 1           # i++
         beq  zero, zero, loop    # unconditional jump (loop again)

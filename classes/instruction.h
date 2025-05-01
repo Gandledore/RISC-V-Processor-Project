@@ -101,7 +101,6 @@ struct Instruction{
                 throw std::runtime_error("Undefined Instruction Type Behavior for instruction type "+std::to_string(Fields[0]));
                 break;
         }
-        std::cout << " | ";
     }
 
     ~Instruction() {

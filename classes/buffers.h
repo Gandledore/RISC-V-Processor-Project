@@ -44,12 +44,16 @@ struct decode_buffer{
     int write_register=0;
     int immediate=0;
     int alu_control=0;
+    int reg1=0;
+    int reg2=0;
 };
 std::ostream& operator<<(std::ostream& os, decode_buffer& db){
     os << "Control Signals: " << db.control_signals.jump << db.control_signals.RegWrite << db.control_signals.MemToReg << db.control_signals.MemRead << db.control_signals.MemWrite << std::bitset<2>(db.control_signals.ALUOp) << db.control_signals.ALUSrc << std::endl;
     os << "Next PC: " << db.next_pc << std::endl;
     os << "Dependencies: " << db.dependencies[0] << " | " << db.dependencies[1] << std::endl;
-    os << "Reg1 Data: " << db.reg1_data << "Reg2 Data: " << db.reg2_data<< " | Write Register: " << db.write_register << " | Immediate: " << db.immediate << " | ALU Control: " << std::bitset<4>(db.alu_control);
+    os << "Reg1: " << db.reg1 << " | Reg1 Data: " << db.reg1_data;
+    os << "Reg2: " << db.reg2 << " | Reg2 Data: " << db.reg2_data;
+    os << "Write Register: " << db.write_register << " | Immediate: " << db.immediate << " | ALU Control: " << std::bitset<4>(db.alu_control);
     return os;
 }
 
@@ -70,12 +74,13 @@ struct execute_buffer{
     int alu_result=0;
     int write_register=0;
     int reg2_data=0;
+    int reg2=0;
 };
 std::ostream& operator<<(std::ostream& os, execute_buffer& eb){
     os << "Control Signals: " << eb.control_signals.jump << eb.control_signals.RegWrite << eb.control_signals.MemToReg << eb.control_signals.MemRead << eb.control_signals.MemWrite << std::endl;
     os << "Next PC: " << eb.next_pc << std::endl;
     os << "Dependencies: " << eb.dependencies[0] << " | " << eb.dependencies[1] << std::endl;
-    os << "ALU Result: " << eb.alu_result << " | Reg2 Data: " << eb.reg2_data << " | Write Register: " << eb.write_register;
+    os << "ALU Result: " << eb.alu_result << " | Reg2: " << eb.reg2 << " | Reg2 Data: " << eb.reg2_data << " | Write Register: " << eb.write_register;
     return os;
 }
 
