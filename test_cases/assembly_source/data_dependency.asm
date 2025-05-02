@@ -7,7 +7,7 @@ loop: add t1, t0, t1    #depends on I2 and I3
 addi t2, t2 , 0xa9      #depends on I5
 addi t3, zero, 0x2c     #no dependencies
 done: addi t3, t3, 4    #depends on I8
-      sw t2, 0(t3)      #depends on I7
+      sw t2, 0(t3)      #depends on I7 and I9
       lw t4, 16(t3)     #depends on I7
       beq t4, t0 , done
 

@@ -7,6 +7,7 @@
 #include <deque>
 #include <algorithm>
 #include <utility>
+#include <filesystem>
 
 #include "instruction.h"
 #include "buffers.h"
@@ -79,34 +80,7 @@ class Processor{
         dmem = new int[imem_size];
         imem = new int[dmem_size];
 
-        //set up registers and memory to 0
-        memset(rf, 0, sizeof(rf));
-        memset(dmem, 0, dmem_size * sizeof(int));
-        memset(imem, 0, imem_size * sizeof(int));
-
-        //sample_1 initial state
-        // rf[1]=0x20; rf[2]=0x5;  rf[10]=0x70;    rf[11]=0x4;
-        // dmem[0x70/sizeof(int)]=0x5;   dmem[0x74/sizeof(int)]=0x10;
-
-        //sample_2 initial state
-        // rf[8]=0x20; rf[10]=0x5; rf[11]=0x2; rf[12]=0xa; rf[13]=0xf;
-
-        //test initial state: expected output: 0x14 at memory 0x5c 
-        // dmem[3]=1; dmem[4]=-3; dmem[5]=5; dmem[6]=-2; dmem[7]=19;
-
-        //test2 initial state: expected output: 0x20 at memory 0x64
-        // dmem[5]=0xabc; dmem[6]=0xdef; dmem[7]=0x1234; dmem[8]=0x5678; dmem[9]=0x9abc;
-        // std::cout << std::hex << (dmem[5] & dmem[6] & dmem[7] & dmem[8] & dmem[9]) << std::endl;
-        
-        //test3 initial state: expected output 0x27a at memory 0x64
-        // dmem[3] = 0x34; dmem[4] = 0x77; dmem[5] = 0x28; dmem[6] = 0xb6; dmem[7] = 0xf1;
-
-        //dependency test state: expected output 0xac at memory 0x30, 0x34, 0x38, 0x3c
-        dmem[16] = 1, dmem[17] = 1; dmem[18] = 1; dmem[19] = 2;
         //tracking variables
-        pc = 0;
-        flush_flag = false;
-        total_clock_cycles = 0;
         program_loaded = false;
     }
 
@@ -115,12 +89,48 @@ class Processor{
         delete[] imem;
     }
     
+    void initialize_memory(std::string filename){
+        //set up registers and memory to 0
+        memset(rf, 0, sizeof(rf));
+        memset(dmem, 0, dmem_size * sizeof(int));
+        memset(imem, 0, imem_size * sizeof(int));
+        
+        if (filename == "sample_part1.txt") {//expected output: 0x2f at 0x70
+            rf[1]=0x20; rf[2]=0x5;  rf[10]=0x70;    rf[11]=0x4;
+            dmem[0x70/sizeof(int)]=0x5;   dmem[0x74/sizeof(int)]=0x10;
+        }
+        else if(filename=="sample_part2.txt"){//expected output: 0x3 at memory 0x20
+            rf[8]=0x20; rf[10]=0x5; rf[11]=0x2; rf[12]=0xa; rf[13]=0xf;
+        }
+        else if(filename=="test1.txt"){//expected output: 0x14 at memory 0x5c 
+            dmem[3]=1; dmem[4]=-3; dmem[5]=5; dmem[6]=-2; dmem[7]=19;
+        }
+        else if(filename=="test2.txt"){//expected output: 0x20 at memory 0x64
+            dmem[5]=0xabc; dmem[6]=0xdef; dmem[7]=0x1234; dmem[8]=0x5678; dmem[9]=0x9abc;
+        }
+        else if(filename=="test3.txt"){//expected output 0x27a at memory 0x64
+            dmem[3] = 0x34; dmem[4] = 0x77; dmem[5] = 0x28; dmem[6] = 0xb6; dmem[7] = 0xf1;
+        }
+        else if(filename=="data_dependency.txt"){//expected output 0xac at memory 0x30, 0x34, 0x38, 0x3c
+            dmem[16] = 1, dmem[17] = 1; dmem[18] = 1; dmem[19] = 2;
+        }
+        else{
+            std::cout << "Unknown Initial State. Using 0s." << std::endl;
+        }
+    }
+
     bool load(std::string filepath){//parse textfile, store to imem, return bool for success status
         std::ifstream file(filepath);
         if (!file) {
             std::cerr << "Error opening file!" << std::endl;
             return false; //failure
         }
+        
+        std::filesystem::path p(filepath);
+        std::string filename = p.filename().string();
+        initialize_memory(filename);
+
+        std::cout << "Loading " << filename << " Instructions..." << std::endl;
         std::string line;
         int i=0;
         while(i<imem_size && std::getline(file, line)){
@@ -130,6 +140,7 @@ class Processor{
         }
         file.close();
         max_pc=i*sizeof(int);//last instruction address + sizeof(int)
+        
         program_loaded=true;
         return true;//succes
     }
@@ -159,18 +170,15 @@ class Processor{
         }
     }
 
-    void fetch_all_buffers(fetch_buffer* personal_fetch_buff, decode_buffer* personal_decode_buff, execute_buffer* personal_execute_buff, mem_buffer* personal_mem_buff){//copy buffers to personal buffers
-        *personal_fetch_buff = fetch_buff;
-        *personal_decode_buff = decode_buff;
-        *personal_execute_buff = execute_buff;
-        *personal_mem_buff = mem_buff;
-        return;
+    void run(){//public wrapper for private run_program function
+        run_program();
     }
+
+    private:
     void update_all_buffers(fetch_buffer* personal_fetch_buff, decode_buffer* personal_decode_buff, execute_buffer* personal_execute_buff, mem_buffer* personal_mem_buff){//update buffers with personal buffers
         if(!stall_flag && !flush_flag){//if no stall or flush is needed, update fetch buffers
             fetch_buff = *personal_fetch_buff;
         }
-        else if(stall_flag){pc-=sizeof(int);}
         else if(flush_flag){fetch_buff = {0,0};}
         decode_buff = *personal_decode_buff;
         execute_buff = *personal_execute_buff;
@@ -181,28 +189,31 @@ class Processor{
         return;
     }
 
-    void run(){//run loaded program
+    void run_program(){
         if(!program_loaded){
             std::cout << "No program loaded" << std::endl;
             return;
         }
+        
+        pc = 0;
+        flush_flag = false;
+        stall_flag = false;
+        
         int inst;
-        int instruction_count = 0;
         int max_instructions = 100;
-        max_pc+=3*4;
-        fetch_buffer personal_fetch_buff;//copy fetch buffer to personal fetch buffer
-        execute_buffer personal_execute_buff;//copy execute buffer to personal execute buffer
-        decode_buffer personal_decode_buff;//copy decode buffer to personal decode buffer
-        mem_buffer personal_mem_buff;//copy mem buffer to personal mem buffer
-        while(pc<max_pc && pc>=0 && instruction_count++<max_instructions){//within bounds of instruction memory
+        max_pc+=4*sizeof(int);
+        total_clock_cycles = 0;
+        while(pc<max_pc && pc>=0 && total_clock_cycles++<max_instructions){//within bounds of instruction memory
             std::cout << "\ntotal_clock_cycles: " << std::dec << total_clock_cycles << std::endl;
-            fetch_all_buffers(&personal_fetch_buff, &personal_decode_buff, &personal_execute_buff, &personal_mem_buff);//copy buffers to personal buffers
+
             fetch_buffer new_fetch = Fetch();
-            decode_buffer new_decode = Decode(personal_fetch_buff);
-            execute_buffer new_exe = Execute(personal_decode_buff);
-            mem_buffer new_mem = Mem(personal_execute_buff);
-            Write(personal_mem_buff);
-            update_all_buffers(&new_fetch, &new_decode, &new_exe, &new_mem);//update buffers with personal buffers
+            decode_buffer new_decode = Decode();
+            execute_buffer new_exe = Execute();
+            mem_buffer new_mem = Mem();
+            Write();
+
+            update_all_buffers(&new_fetch, &new_decode, &new_exe, &new_mem);//update buffers with each stage's computations for this cycle
+
             std::cout << "pc is modified to 0x" << std::hex << pc << std::endl;
         }
         if(pc==max_pc){//program finished
@@ -212,18 +223,16 @@ class Processor{
             std::cout << "Instruction out of bounds" << std::endl;
             std::cout << "pc: " << std::hex << pc << std::endl;
             std::cout << "max_pc: " << std::hex << max_pc << std::endl;
-            std::cout << std::dec << instruction_count << "/" << max_instructions << " instructions executed" << std::endl;
+            std::cout << std::dec << total_clock_cycles << "/" << max_instructions << " instructions executed" << std::endl;
         }
         return;
     }
 
-    private:
     fetch_buffer Fetch(){
         std::cout << "Fetch Stage  | Fetching instruction " << (pc/sizeof(int)) << std::endl;
 
         int instruction = imem[pc/sizeof(int)];//instruction memory is composed of ints so divide by sizeof(int)
         fetch_buffer new_fetch = {instruction,pc};
-        total_clock_cycles+=1;
         return new_fetch;
     }
 
@@ -283,16 +292,16 @@ class Processor{
         }
     }
     
-    decode_buffer Decode(fetch_buffer personal_fetch_buff){//returns instruction_data type = r1_data,r2_data,write_reg,immediate,alu_ctrl (instr[12-14|30])
+    decode_buffer Decode(){//returns instruction_data type = r1_data,r2_data,write_reg,immediate,alu_ctrl (instr[12-14|30])
         std::cout << "Decode Stage | ";
         decode_buffer new_decode_buffer;
-        if(personal_fetch_buff.instruction==0){
+        if(fetch_buff.instruction==0){
             new_decode_buffer.control_signals={0,0,0,0,0,0,0};
             std::cout << "NOP Instruction" << std::endl;
             new_pc = pc+4;
             return new_decode_buffer;
         }
-        Instruction instruction(personal_fetch_buff.instruction);
+        Instruction instruction(fetch_buff.instruction);
         instruction.decode_instruction_fields();
         std::cout << " | ";
         decoded_data data = instruction.decode();
@@ -320,7 +329,7 @@ class Processor{
         int instruction_dependence_offset_2 = dependencies.size() - dependence_index2;
 
         // std::cout << "\nDependence Index 1: " << dependence_index1 << " | Dependence Index 2: " << dependence_index2 << std::endl;
-        std::cout << "Instruction Dependence Offsets: (" << instruction_dependence_offset_1 << ", " << instruction_dependence_offset_2 << ") | ";
+        std::cout << "Instruction Dependence Offsets: (" << instruction_dependence_offset_1 << ", " << instruction_dependence_offset_2 << ") | " << "Available: " << calculate_stage_available(data.opcode) << " | ";
         //Stall Calculation
         //buffer offset (relative to stage available) = stage needed - stage available + instruction offset
         //buffer index = stage needed + instruction offset
@@ -329,24 +338,27 @@ class Processor{
         int buffer_index1 = stage_needed1 + instruction_dependence_offset_1;
         int buffer_index2 = stage_needed2 + instruction_dependence_offset_2;
         stall_flag = (instruction_dependence_offset_1>0 && buffer_index1 < dependencies[dependence_index1].stage_available) 
-                    || (instruction_dependence_offset_1>0 && buffer_index2 < dependencies[dependence_index2].stage_available);
+                    || (instruction_dependence_offset_2>0 && buffer_index2 < dependencies[dependence_index2].stage_available);
 
         if(stall_flag){//if stall is needed, set control signals to 0, don't update pc so it fetches the same instruction, return
             std::cout << "Stalling" << std::endl;
             new_decode_buffer.control_signals = {0,0,0,0,0,0b00,0};//set control signals to 0
             dependencies.push_back({0,0});//push nop bubble into dependencies deque
             //return to avoid unecessary (and potentially incorrect) calculations: updating pc, flushing the pipeline, and updating the decode buffer
+            new_pc = pc;
             return new_decode_buffer;
         }
         dependencies.push_back({data.write_register*control_signals.RegWrite, calculate_stage_available(data.opcode)});//push instruction update to dependencies deque
         new_decode_buffer.dependencies[0] = {buffer_index1, stage_needed1, instruction_dependence_offset_1>0 && stage_needed1<5};//rs1 dependency
         new_decode_buffer.dependencies[1] = {buffer_index2, stage_needed2, instruction_dependence_offset_2>0 && stage_needed2<5};//rs2 dependency
         
+        std::cout << "Dependence Indexes: " << dependence_index1 << ", " << dependence_index2 << std::endl;
+        std::cout << "Depends on: " << dependencies[dependence_index1] << " | " << dependencies[dependence_index2] << std::endl;
         std::cout << "Instruction Dependencies: " << new_decode_buffer.dependencies[0] << ", " << new_decode_buffer.dependencies[1] << std::endl;
         int reg1_data = (new_decode_buffer.dependencies[0].stage_needed==1 && new_decode_buffer.dependencies[0].is_dependent)? get_buffer_data(buffer_index1) : rf[data.read_register_1];
         int reg2_data = (new_decode_buffer.dependencies[1].stage_needed==1 && new_decode_buffer.dependencies[1].is_dependent)? get_buffer_data(buffer_index2) : rf[data.read_register_2];
 
-        int next_pc = personal_fetch_buff.pc + sizeof(int);
+        int next_pc = fetch_buff.pc + sizeof(int);
 
         //update decode buffer
         new_decode_buffer.next_pc = next_pc;
@@ -366,7 +378,7 @@ class Processor{
                                         control_signals.ALUSrc};
         
         //early branch detection
-        int branch_target = personal_fetch_buff.pc + data.immediate;//calculate branch target adress, instruction offset bit shift accounted for in decoding of immediate
+        int branch_target = fetch_buff.pc + data.immediate;//calculate branch target adress, instruction offset bit shift accounted for in decoding of immediate
         int jump_target = control_signals.Branch ? branch_target : reg1_data+data.immediate; //jump target mux
         new_pc = (control_signals.jump || (control_signals.Branch && (reg1_data==reg2_data))) ? jump_target : pc+4;//branch mux
         
@@ -374,11 +386,6 @@ class Processor{
             flush_flag = true;
             std::cout << "Flushing" << std::endl;
         }
-        // std::cout << "\t\tPotential Dependencies: ";
-        // for(auto& dep : dependencies){
-        //     std::cout << dep << " | ";
-        // }
-        // std::cout << std::endl;
         return new_decode_buffer;
     }
     ControlSignals ControlUnit(int opcode){
@@ -436,25 +443,26 @@ class Processor{
         }
     }
     
-    execute_buffer Execute(decode_buffer personal_decode_buffer){
+    execute_buffer Execute(){
+        
         std::cout << "Execute Stage| ";
         execute_buffer new_execute_buffer;
         decode_buffer_control_signals nop_control_signals;
-        if (personal_decode_buffer.control_signals==nop_control_signals){//if control signals are 0, do nothing (NOP), pass forward
+        if (decode_buff.control_signals==nop_control_signals){//if control signals are 0, do nothing (NOP), pass forward
             std::cout << "NOP Instruction" << std::endl; 
             new_execute_buffer.control_signals={0,0,0,0,0};
             return new_execute_buffer;
         }
-        int alu_control = personal_decode_buffer.alu_control;
-        int immediate = personal_decode_buffer.immediate;
-        dependency rs1_dependency = personal_decode_buffer.dependencies[0];
-        dependency rs2_dependency = personal_decode_buffer.dependencies[1];
-        std::cout << rs1_dependency.buffer_index << ", " << rs2_dependency.buffer_index << " | ";
-        int reg1_data = (rs1_dependency.stage_needed==2 && rs1_dependency.is_dependent)? get_buffer_data(rs1_dependency.buffer_index,personal_decode_buffer.reg1) : personal_decode_buffer.reg1_data;
-        int reg2_data = (rs2_dependency.stage_needed==2 && rs2_dependency.is_dependent)? get_buffer_data(rs2_dependency.buffer_index,personal_decode_buffer.reg2) : personal_decode_buffer.reg2_data;
+        int alu_control = decode_buff.alu_control;
+        int immediate = decode_buff.immediate;
+        dependency rs1_dependency = decode_buff.dependencies[0];
+        dependency rs2_dependency = decode_buff.dependencies[1];
+        std::cout << rs1_dependency.buffer_index*rs1_dependency.is_dependent*(rs1_dependency.stage_needed==2) << ", " << rs2_dependency.buffer_index*rs2_dependency.is_dependent*(rs2_dependency.stage_needed==2) << " | ";
+        int reg1_data = (rs1_dependency.stage_needed==2 && rs1_dependency.is_dependent)? get_buffer_data(rs1_dependency.buffer_index,decode_buff.reg1) : decode_buff.reg1_data;
+        int reg2_data = (rs2_dependency.stage_needed==2 && rs2_dependency.is_dependent)? get_buffer_data(rs2_dependency.buffer_index,decode_buff.reg2) : decode_buff.reg2_data;
     
-        int input2 = personal_decode_buffer.control_signals.ALUSrc ? immediate : reg2_data; //ALU_Src mux
-        ALU_Op alu_operation = ALU_Control(personal_decode_buffer.control_signals.ALUOp, alu_control);
+        int input2 = decode_buff.control_signals.ALUSrc ? immediate : reg2_data; //ALU_Src mux
+        ALU_Op alu_operation = ALU_Control(decode_buff.control_signals.ALUOp, alu_control);
         int alu_result;
         switch(alu_operation){
             case ADD://also for nop
@@ -478,54 +486,54 @@ class Processor{
         }
 
         //update execute buffer
-        new_execute_buffer.control_signals = {personal_decode_buffer.control_signals.jump, 
-                                        personal_decode_buffer.control_signals.RegWrite, 
-                                        personal_decode_buffer.control_signals.MemToReg, 
-                                        personal_decode_buffer.control_signals.MemRead, 
-                                        personal_decode_buffer.control_signals.MemWrite};
-        new_execute_buffer.next_pc = personal_decode_buffer.next_pc;
+        new_execute_buffer.control_signals = {decode_buff.control_signals.jump, 
+                                        decode_buff.control_signals.RegWrite, 
+                                        decode_buff.control_signals.MemToReg, 
+                                        decode_buff.control_signals.MemRead, 
+                                        decode_buff.control_signals.MemWrite};
+        new_execute_buffer.next_pc = decode_buff.next_pc;
         new_execute_buffer.alu_result = alu_result;
-        new_execute_buffer.write_register = personal_decode_buffer.write_register;
-        new_execute_buffer.reg2 = personal_decode_buffer.reg2;
+        new_execute_buffer.write_register = decode_buff.write_register;
+        new_execute_buffer.reg2 = decode_buff.reg2;
         new_execute_buffer.reg2_data = reg2_data;
-        new_execute_buffer.dependencies[0] = personal_decode_buffer.dependencies[0];
-        new_execute_buffer.dependencies[1] = personal_decode_buffer.dependencies[1];
+        new_execute_buffer.dependencies[0] = decode_buff.dependencies[0];
+        new_execute_buffer.dependencies[1] = decode_buff.dependencies[1];
         return new_execute_buffer;
     }
 
-    mem_buffer Mem(execute_buffer personal_execute_buffer){
+    mem_buffer Mem(){
         std::cout << "Memory Stage | ";
         mem_buffer new_mem_buffer;
         execute_buffer_control_signals nop_control_signals;
-        if (personal_execute_buffer.control_signals==nop_control_signals){//if control signals are 0, do nothing (NOP), pass forward
+        if (execute_buff.control_signals==nop_control_signals){//if control signals are 0, do nothing (NOP), pass forward
             std::cout << "NOP Instruction" << std::endl;
             new_mem_buffer.control_signals={0,0,0};
             return new_mem_buffer;
         }
-        int alu_result = personal_execute_buffer.alu_result;
-        dependency rs2_dependency = personal_execute_buffer.dependencies[1];
-        int reg2_data = (rs2_dependency.stage_needed==3 && rs2_dependency.is_dependent)? get_buffer_data(rs2_dependency.buffer_index,personal_execute_buffer.reg2) : personal_execute_buffer.reg2_data;
-        int next_pc = personal_execute_buffer.next_pc;
-        int write_reg = personal_execute_buffer.write_register;
+        int alu_result = execute_buff.alu_result;
+        dependency rs2_dependency = execute_buff.dependencies[1];
+        int reg2_data = (rs2_dependency.stage_needed==3 && rs2_dependency.is_dependent)? get_buffer_data(rs2_dependency.buffer_index,execute_buff.reg2) : execute_buff.reg2_data;
+        int next_pc = execute_buff.next_pc;
+        int write_reg = execute_buff.write_register;
 
         int address = alu_result/sizeof(int); //data memory is composed of ints so divide by sizeof(int)
         int mem_read_data=alu_result;
-        if(personal_execute_buffer.control_signals.MemRead){
+        if(execute_buff.control_signals.MemRead){
             mem_read_data = dmem[address];
             std::cout << "Read memory at 0x" << std::hex << alu_result << " = 0x" << std::hex << mem_read_data << std::endl;
         }
-        if(personal_execute_buffer.control_signals.MemWrite){
+        if(execute_buff.control_signals.MemWrite){
             dmem[address] = reg2_data;
             std::cout << "memory 0x" << std::hex << alu_result << " is modified to 0x" << std::hex << reg2_data << std::endl;
         }
-        if(!personal_execute_buffer.control_signals.MemRead && !personal_execute_buffer.control_signals.MemWrite){
+        if(!execute_buff.control_signals.MemRead && !execute_buff.control_signals.MemWrite){
             std::cout << "Did not use Memory" << std::endl;
         }
 
         //update mem buffer
-        new_mem_buffer.control_signals = {personal_execute_buffer.control_signals.jump, 
-                                    personal_execute_buffer.control_signals.RegWrite, 
-                                    personal_execute_buffer.control_signals.MemToReg};
+        new_mem_buffer.control_signals = {execute_buff.control_signals.jump, 
+                                    execute_buff.control_signals.RegWrite, 
+                                    execute_buff.control_signals.MemToReg};
         new_mem_buffer.next_pc = next_pc;
         new_mem_buffer.alu_result = alu_result;
         new_mem_buffer.write_register = write_reg;
@@ -533,21 +541,21 @@ class Processor{
         return new_mem_buffer;
     }
 
-    void Write(mem_buffer personal_mem_buff){
+    void Write(){
         std::cout << "Write Stage  | ";
         mem_buffer_control_signals nop_control_signals;
-        if (personal_mem_buff.control_signals==nop_control_signals){//if control signals are 0, do nothing (NOP)
+        if (mem_buff.control_signals==nop_control_signals){//if control signals are 0, do nothing (NOP)
             std::cout << "NOP Instruction" << std::endl;
             return;
         }
-        int mem_read_data = personal_mem_buff.mem_read_data;
-        int alu_result = personal_mem_buff.alu_result;
-        int next_pc = personal_mem_buff.next_pc;
-        int write_reg = personal_mem_buff.write_register;
+        int mem_read_data = mem_buff.mem_read_data;
+        int alu_result = mem_buff.alu_result;
+        int next_pc = mem_buff.next_pc;
+        int write_reg = mem_buff.write_register;
 
-        int write_data = personal_mem_buff.control_signals.MemToReg ? mem_read_data : alu_result;     //write back mux
-        write_data = personal_mem_buff.control_signals.jump ? next_pc : write_data; //jump mux
-        if(personal_mem_buff.control_signals.RegWrite){
+        int write_data = mem_buff.control_signals.MemToReg ? mem_read_data : alu_result;     //write back mux
+        write_data = mem_buff.control_signals.jump ? next_pc : write_data; //jump mux
+        if(mem_buff.control_signals.RegWrite){
             rf[write_reg] = write_data;
             std::cout << "x" << std::dec << write_reg << " is modified to 0x" << std::hex << write_data << std::endl;
         }
