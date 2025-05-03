@@ -200,8 +200,8 @@ class Processor{
         stall_flag = false;
         
         int inst;
-        int max_instructions = 100;
-        max_pc+=4*sizeof(int);
+        int max_instructions = 128;
+        max_pc+=3*sizeof(int);
         total_clock_cycles = 0;
         while(pc<max_pc && pc>=0 && total_clock_cycles++<max_instructions){//within bounds of instruction memory
             std::cout << "\ntotal_clock_cycles: " << std::dec << total_clock_cycles << std::endl;
@@ -297,6 +297,7 @@ class Processor{
         decode_buffer new_decode_buffer;
         if(fetch_buff.instruction==0){
             new_decode_buffer.control_signals={0,0,0,0,0,0,0};
+            dependencies.push_back({0,0});//push nop bubble into dependencies deque
             std::cout << "NOP Instruction" << std::endl;
             new_pc = pc+4;
             return new_decode_buffer;
@@ -328,8 +329,7 @@ class Processor{
         int instruction_dependence_offset_1 = dependencies.size() - dependence_index1;
         int instruction_dependence_offset_2 = dependencies.size() - dependence_index2;
 
-        // std::cout << "\nDependence Index 1: " << dependence_index1 << " | Dependence Index 2: " << dependence_index2 << std::endl;
-        std::cout << "Instruction Dependence Offsets: (" << instruction_dependence_offset_1 << ", " << instruction_dependence_offset_2 << ") | " << "Available: " << calculate_stage_available(data.opcode) << " | ";
+        std::cout << "Instruction Dependence Offsets: (" << instruction_dependence_offset_1 << ", " << instruction_dependence_offset_2 << ") | ";
         //Stall Calculation
         //buffer offset (relative to stage available) = stage needed - stage available + instruction offset
         //buffer index = stage needed + instruction offset
@@ -352,11 +352,9 @@ class Processor{
         new_decode_buffer.dependencies[0] = {buffer_index1, stage_needed1, instruction_dependence_offset_1>0 && stage_needed1<5};//rs1 dependency
         new_decode_buffer.dependencies[1] = {buffer_index2, stage_needed2, instruction_dependence_offset_2>0 && stage_needed2<5};//rs2 dependency
         
-        std::cout << "Dependence Indexes: " << dependence_index1 << ", " << dependence_index2 << std::endl;
-        std::cout << "Depends on: " << dependencies[dependence_index1] << " | " << dependencies[dependence_index2] << std::endl;
         std::cout << "Instruction Dependencies: " << new_decode_buffer.dependencies[0] << ", " << new_decode_buffer.dependencies[1] << std::endl;
-        int reg1_data = (new_decode_buffer.dependencies[0].stage_needed==1 && new_decode_buffer.dependencies[0].is_dependent)? get_buffer_data(buffer_index1) : rf[data.read_register_1];
-        int reg2_data = (new_decode_buffer.dependencies[1].stage_needed==1 && new_decode_buffer.dependencies[1].is_dependent)? get_buffer_data(buffer_index2) : rf[data.read_register_2];
+        int reg1_data = (new_decode_buffer.dependencies[0].stage_needed==1 && new_decode_buffer.dependencies[0].is_dependent)? get_buffer_data(buffer_index1,data.read_register_1) : rf[data.read_register_1];
+        int reg2_data = (new_decode_buffer.dependencies[1].stage_needed==1 && new_decode_buffer.dependencies[1].is_dependent)? get_buffer_data(buffer_index2,data.read_register_1) : rf[data.read_register_2];
 
         int next_pc = fetch_buff.pc + sizeof(int);
 
@@ -380,9 +378,10 @@ class Processor{
         //early branch detection
         int branch_target = fetch_buff.pc + data.immediate;//calculate branch target adress, instruction offset bit shift accounted for in decoding of immediate
         int jump_target = control_signals.Branch ? branch_target : reg1_data+data.immediate; //jump target mux
-        new_pc = (control_signals.jump || (control_signals.Branch && (reg1_data==reg2_data))) ? jump_target : pc+4;//branch mux
+        bool jump_taken = (control_signals.jump || (control_signals.Branch && (reg1_data==reg2_data)));
+        new_pc =  jump_taken ? jump_target : pc+4;//branch mux
         
-        if(new_pc == jump_target){//if branch taken, flush
+        if(jump_taken){//if branch taken, flush
             flush_flag = true;
             std::cout << "Flushing" << std::endl;
         }

@@ -15,7 +15,6 @@ loop:   beq  t1, s0, done         # if i == 5, done
 done:   addi t5, t0, 100          # address to store result
         sw   t4, 0(t5)            # store result
         beq  zero, zero, end     # halt (loop forever)
-and_subroutine:# Computes t4 = t4 & t3
-        and  t4, t4, t3
+and_subroutine: and  t4, t4, t3 # Computes t4 = t4 & t3
         jalr zero, ra, 0          # return
 end:

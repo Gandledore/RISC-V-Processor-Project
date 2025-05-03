@@ -1,4 +1,4 @@
-        addi t0, zero, 12        # t0 = start address of array
+	la t0, vec        	# t0 = start address of array
         addi t1, zero, 0         # t1 = index
         addi t2, zero, 5         # t2 = number of elements
         addi t3, zero, 0         # t3 = running sum
@@ -9,7 +9,7 @@ loop:   beq  t1, t2, done        # if index == 3, exit loop
         addi t0, t0, 4           # next memory address
         addi t1, t1, 1           # i++
         beq  zero, zero, loop    # unconditional jump (loop again)
-done:   addi t6, zero, 100       # target address = 100
+done:   la t6, output       # target address = 100
         sw   t3, 0(t6)           # store final result
         beq  zero, zero, end    # halt (infinite loop)
 process:andi t6, t4, 1           # check LSB: even if (val & 1 == 0)
