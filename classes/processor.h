@@ -264,9 +264,10 @@ class Processor{
             case 0b0111011://R type | rs1,2 needed in decode buffer
                 return {2,2};
             case 0b0010011://I type | rs1 needed in decode buffer, no rs2
-            case 0b1100111://jalr | rs1 neeeded in decode buffer, no rs2
             case 0b0000011://load | rs1 needed in decode buffer no rs2
                 return {2,5};
+            case 0b1100111://jalr | rs1 neeeded in fetch buffer, no rs2
+                return {1,5};
             case 0b0100011://sw   | rs1 needed in decode buffer rs2 needed in execute buffer
                 return {2,3};
             case 0b1100011://branch | needed in fetch_buffer (actually just needs correct info by the end of fetch stage)
@@ -313,7 +314,7 @@ class Processor{
         }
         
         //Stall Logic
-        if(dependencies.size() > 3){//keep only most recent 3 instruction dependences (longest dependency is lw->branch (w/ early detection) = 3 instruction offset)
+        while(dependencies.size() > 3){//keep only most recent 3 instruction dependences (longest dependency is lw->branch (w/ early detection) = 3 instruction offset)
             dependencies.pop_front();
         }
 
@@ -516,7 +517,7 @@ class Processor{
         int write_reg = execute_buff.write_register;
 
         int address = alu_result/sizeof(int); //data memory is composed of ints so divide by sizeof(int)
-        int mem_read_data=alu_result;
+        int mem_read_data=execute_buff.control_signals.jump ? execute_buff.next_pc : alu_result; //jump mux
         if(execute_buff.control_signals.MemRead){
             mem_read_data = dmem[address];
             std::cout << "Read memory at 0x" << std::hex << alu_result << " = 0x" << std::hex << mem_read_data << std::endl;
