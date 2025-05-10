@@ -201,7 +201,7 @@ class Processor{
         
         int inst;
         int max_instructions = 128;
-        max_pc+=3*sizeof(int);
+        max_pc+=4*sizeof(int);
         total_clock_cycles = 0;
         while(pc<max_pc && pc>=0 && total_clock_cycles++<max_instructions){//within bounds of instruction memory
             std::cout << "\ntotal_clock_cycles: " << std::dec << total_clock_cycles << std::endl;
@@ -243,13 +243,13 @@ class Processor{
         switch(opcode){//stage available = stage needed - instruction offset
             case 0b0110011://R 
             case 0b0111011://R type | available in execute buffer
-            case 0b1100111://jalr | available in execute buffer
             case 0b0010011://I type | available in execute buffer
-                return 3;
+            return 3;
             case 0b0000011://load | available in mem buffer
-                return 4;
+            return 4;
+            case 0b1100111://jalr | available in execute buffer
             case 0b1101111://jal | available in fetch buffer
-                return 1;
+                return 2;
             case 0b0100011://sw | doesn't cause dependencies
             case 0b1100011://branch | doesn't cause dependencies
             case 0b0000000://nop
@@ -282,6 +282,8 @@ class Processor{
     int get_buffer_data(int buffer_index, int register_num=-1){//get data from the buffer based on the buffer index and register number (if needed)
         buffer_index = std::min(5,buffer_index);
         switch(buffer_index){
+            case 2:
+                return decode_buff.next_pc;//get data from decode buffer (eg rs1, rs2)
             case 3://get data from execute buffer (alu result) (eg R type)
                 return execute_buff.alu_result;
             case 4://get data from mem buffer (mem read data) (eg load)
@@ -492,7 +494,7 @@ class Processor{
                                         decode_buff.control_signals.MemRead, 
                                         decode_buff.control_signals.MemWrite};
         new_execute_buffer.next_pc = decode_buff.next_pc;
-        new_execute_buffer.alu_result = alu_result;
+        new_execute_buffer.alu_result = decode_buff.control_signals.jump ? decode_buff.next_pc : alu_result;
         new_execute_buffer.write_register = decode_buff.write_register;
         new_execute_buffer.reg2 = decode_buff.reg2;
         new_execute_buffer.reg2_data = reg2_data;

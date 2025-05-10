@@ -18,3 +18,5 @@ done:   addi t5, t0, 100          # address to store result                     
 and_subroutine: and  t4, t4, t3 # Computes t4 = t4 & t3                                 # depends on I10
         jalr zero, ra, 0          # return                                              # depends on I11
 end:
+
+# pipelined: 61 clock cycles

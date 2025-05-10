@@ -12,9 +12,5 @@ done: addi t3, t3, 4    #depends on I8
       beq t4, t0 , done
 
 #loop is completely meaningless, but tests some dependency and flushing (will need to add lw dependencies too)
-#stores 0x3 to memory 0x4c
 
-# 5
-# 1 2 3 4 5 6 7
-# offset = 2+1=3
-# 
+# pipelined: 50 clock cycles

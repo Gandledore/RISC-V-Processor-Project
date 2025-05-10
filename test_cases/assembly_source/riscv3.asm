@@ -31,3 +31,5 @@ end:
 # Description:
 #   If even: mask with 0xF0, OR with 0x0F, then subtract 1
 #   If odd:  return value unchanged
+
+# piplined: 103 clock cycles

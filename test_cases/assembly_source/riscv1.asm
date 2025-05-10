@@ -21,3 +21,5 @@ done:	addi t4, t0, 92           # address = base + 92          #  no dependencie
 # t4 - loaded value from array
 # t5 - end index (5)
 # t6 - offset increment (4)
+
+# pipelined: 54 clock cycles
