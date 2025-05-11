@@ -1,3 +1,6 @@
+#ifndef INSTRUCTION_H
+#define INSTRUCTION_H
+
 #include <iostream>
 #include <bitset>
 #include <string>
@@ -447,3 +450,5 @@ std::ostream& operator<<(std::ostream& os,Instruction& instruction){            
     }
     return os;
 }
+
+#endif
