@@ -80,29 +80,24 @@ struct Instruction{
         return data;
     }
     
-    void decode_instruction_fields(){
+    std::ostringstream decode_instruction_fields(){
+        std::ostringstream oss;
         switch(Fields[0]){
             case R:
-                decode_R();
-                break;
+                return decode_R();
             case S:
-                decode_S();
-                break;
+                return decode_S();
             case UJ:
-                decode_UJ();
-                break;
+                return decode_UJ();
             case SB:
-                decode_SB();
-                break;
+                return decode_SB();
             case I:
-                decode_I();
-                break;
+                return decode_I();
             case nil:
-                std::cout << "NOP Instruction";
-                break;
+                oss << "NOP Instruction";
+                return oss;
             default:
                 throw std::runtime_error("Undefined Instruction Type Behavior for instruction type "+std::to_string(Fields[0]));
-                break;
         }
     }
 
@@ -198,7 +193,7 @@ struct Instruction{
     }
     
 
-    void decode_S(){
+    std::ostringstream decode_S(){
         int immediate = (Fields[5]<<5) + Fields[1];// F[5] = imm[11:5] | F[1] = imm[4:0]
         int funct3 = Fields[2];
         std::string operation = "?";
@@ -224,11 +219,13 @@ struct Instruction{
         // std::cout << "Rs1: x" << Fields[3] << std::endl;
         // std::cout << "Rs2: x" << Fields[4] << std::endl;
         // std::cout << "Immediate: " << immediate << std::endl;
-        std::cout << operation << " x" << std::dec << Fields[3] << ", x" << Fields[4] << ", " << immediate;
+        std::ostringstream oss;
+        oss << operation << " x" << std::dec << Fields[3] << ", x" << Fields[4] << ", " << immediate;
+        return oss;
     }
     
     
-    void decode_R(){
+    std::ostringstream decode_R(){
         int funct7 = Fields[5];
         int funct3 = Fields[2];
         std::string operation = "?";
@@ -287,11 +284,13 @@ struct Instruction{
         // std::cout << "Rd: x" << Fields[1] << std::endl;
         // std::cout << "Funct3: " << Fields[2] << std::endl;
         // std::cout << "Funct7: " << Fields[5] << std::endl;
-        std::cout << operation << " x" << std::dec << Fields[1] << ", x" << Fields[3] << ", x" << Fields[4];
+        std::ostringstream oss;
+        oss << operation << " x" << std::dec << Fields[1] << ", x" << Fields[3] << ", x" << Fields[4];
+        return oss;
     }
     
     
-    void decode_SB(){
+    std::ostringstream decode_SB(){
         int funct3 = Fields[2];
         int immediate = (Fields[5]<<5)+Fields[1];
         int bit11 = (Fields[1]%2) << 11;                            //take bit 0 move to bit 11
@@ -328,11 +327,13 @@ struct Instruction{
         // std::cout << "Rs1: x" <<  Fields[3] << std::endl;
         // std::cout << "Rs2: x" <<  Fields[4] << std::endl;
         // std::cout << "Immediate: " << immediate << std::endl;
-        std::cout << operation << " x" << std::dec << Fields[3] << ", x" << Fields[4] << ", " << immediate;
+        std::ostringstream oss;
+        oss << operation << " x" << std::dec << Fields[3] << ", x" << Fields[4] << ", " << immediate;
+        return oss;
     }
     
     
-    void decode_UJ(){
+    std::ostringstream decode_UJ(){
         
         //unscramble immediate field
         //imm[20|10:1|11|19:12]
@@ -347,11 +348,13 @@ struct Instruction{
         // std::cout << "Operation: " << "jal" << std::endl;
         // std::cout << "Rd: x" << Fields[1] << std::endl;
         // std::cout << "Immediate: " << immediate << std::endl;
-        std::cout << "jal x" << std::dec << Fields[1] << ", " << immediate;
+        std::ostringstream oss;
+        oss << "jal x" << std::dec << Fields[1] << ", " << immediate;
+        return oss;
     }
     
     
-    void decode_I(){
+    std::ostringstream decode_I(){
         // F[1]: rd / F[4]: imm / F[2]: funct3 / F[3]: rs1
         int opcode = Fields[6];
         int funct3 = Fields[2];
@@ -439,7 +442,9 @@ struct Instruction{
         // std::cout << "Rs1: x" << Fields[3] << std::endl;
         // std::cout << "Rd: x" << Fields[1] << std::endl;
         // std::cout << "Immediate: " << immediate << std::endl;
-        std::cout << operation << " x" << std::dec << Fields[1] << ", x" << Fields[3] << ", " << immediate;
+        std::ostringstream oss;
+        oss << operation << " x" << std::dec << Fields[1] << ", x" << Fields[3] << ", " << immediate;
+        return oss;
     }
 };
 
