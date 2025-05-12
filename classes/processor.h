@@ -269,17 +269,17 @@ class Processor{
             int inst_pc = pc;
             clock_tick.arrive_and_wait();//falling edge to write
 
-            fetch_buffer_data new_fetch_bufer;
+            fetch_buffer_data new_fetch_buffer;
             if(!stall_flag && !flush_flag){//if no stall or flush is needed, update fetch buffers
-                new_fetch_bufer = {instruction,inst_pc};
+                new_fetch_buffer = {instruction,inst_pc};
             }
             else if(flush_flag){//if flush, ignore currently fetched instruction and place nop
-                new_fetch_bufer = {0,0};
+                new_fetch_buffer = {0,0};
             }
             
             if(!stall_flag){
                 fetch_lock.lock();
-                fetch_buff.data = new_fetch_bufer;
+                fetch_buff.data = new_fetch_buffer;
                 fetch_lock.unlock();
             }
             
