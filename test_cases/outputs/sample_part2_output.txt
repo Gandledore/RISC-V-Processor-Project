@@ -1,0 +1,143 @@
+Loading sample_part2.txt Instructions...
+
+total clock cycles: 1
+Fetch Stage  | Fetching instruction 0
+Memory Stage | NOP Instruction
+Execute Stage| NOP Instruction
+Decode Stage | NOP Instruction
+Write Stage  | NOP Instruction
+pc is modified to 0x4
+
+total clock cycles: 2
+Execute Stage| NOP Instruction
+Memory Stage | NOP Instruction
+Write Stage  | NOP Instruction
+Fetch Stage  | Fetching instruction 1
+Decode Stage | jal x1, 8 | Instruction Dependence Offsets: (0, 0) | Instruction Dependencies: (Buf: 5, Need: 5, Dep: 0), (Buf: 5, Need: 5, Dep: 0) | Flushing
+pc is modified to 0x8
+
+total clock cycles: 3
+Fetch Stage  | Fetching instruction 2
+Memory Stage | NOP Instruction
+Execute Stage| 0, 0 | 32 = 0 + 32
+Decode Stage | NOP Instruction
+Write Stage  | NOP Instruction
+pc is modified to 0xc
+
+total clock cycles: 4
+Write Stage  | NOP Instruction
+Fetch Stage  | Fetching instruction 3
+Memory Stage | Did not use Memory
+Decode Stage | add x10, x11, x12 | Instruction Dependence Offsets: (0, 0) | Instruction Dependencies: (Buf: 2, Need: 2, Dep: 0), (Buf: 2, Need: 2, Dep: 0)
+Execute Stage| NOP Instruction
+pc is modified to 0x10
+
+total clock cycles: 5
+Decode Stage | sub x30, x13, x10 | Instruction Dependence Offsets: (0, 1) | Instruction Dependencies: (Buf: 2, Need: 2, Dep: 0), (Buf: 3, Need: 2, Dep: 1)
+Execute Stage| 0, 0 | 12 = 2 + 10
+Memory Stage | NOP Instruction
+Fetch Stage  | Fetching instruction 4
+Write Stage  | x1 is modified to 0x4
+pc is modified to 0x14
+
+total clock cycles: 6
+Execute Stage| 0, 3 | 3 = 15 - 12
+Decode Stage | jalr x1, x1, 0 | Instruction Dependence Offsets: (0, 0) | Instruction Dependencies: (Buf: 1, Need: 1, Dep: 0), (Buf: 5, Need: 5, Dep: 0) | Flushing
+Write Stage  | NOP Instruction
+Fetch Stage  | Fetching instruction 5
+Memory Stage | Did not use Memory
+pc is modified to 0x4
+
+total clock cycles: 7
+Execute Stage| 0, 0 | 4 = 4 + 0
+Write Stage  | x10 is modified to 0xc
+Fetch Stage  | Fetching instruction 1
+Memory Stage | Did not use Memory
+Decode Stage | NOP Instruction
+pc is modified to 0x8
+
+total clock cycles: 8
+Fetch Stage  | Fetching instruction 2
+Execute Stage| NOP Instruction
+Decode Stage | jal x1, 16 | Instruction Dependence Offsets: (0, 0) | Instruction Dependencies: (Buf: 5, Need: 5, Dep: 0), (Buf: 5, Need: 5, Dep: 0) | Flushing
+Memory Stage | Did not use Memory
+Write Stage  | x30 is modified to 0x3
+pc is modified to 0x14
+
+total clock cycles: 9
+Memory Stage | NOP Instruction
+Fetch Stage  | Fetching instruction 5
+Decode Stage | NOP Instruction
+Execute Stage| 0, 0 | 0 = 0 + 0
+Write Stage  | x1 is modified to 0x14
+pc is modified to 0x18
+
+total clock cycles: 10
+Execute Stage| NOP Instruction
+Write Stage  | NOP Instruction
+Fetch Stage  | Fetching NOP Instruction (max_pc)
+Decode Stage | sw x8, x30, 0 | Instruction Dependence Offsets: (0, 0) | Instruction Dependencies: (Buf: 2, Need: 2, Dep: 0), (Buf: 3, Need: 3, Dep: 0)
+Memory Stage | Did not use Memory
+pc is modified to 0x18
+
+total clock cycles: 11
+Fetch Stage  | Fetching NOP Instruction (max_pc)
+Write Stage  | x1 is modified to 0x8
+Execute Stage| 0, 0 | 32 = 32 + 0
+Decode Stage | NOP Instruction
+Memory Stage | NOP Instruction
+pc is modified to 0x18
+
+total clock cycles: 12
+Fetch Stage  | Fetching NOP Instruction (max_pc)
+Write Stage  | NOP Instruction
+Memory Stage | memory 0x20 is modified to 0x3
+Decode Stage | NOP Instruction
+Execute Stage| NOP Instruction
+pc is modified to 0x18
+
+total clock cycles: 13
+Write Stage  | NOP Instruction
+Fetch Stage  | Fetching NOP Instruction (max_pc)
+Execute Stage| NOP Instruction
+Decode Stage | NOP Instruction
+Memory Stage | NOP Instruction
+pc is modified to 0x18
+
+Program Finished
+
+
+  Addr:  Instruction Memory (Binary)     | Reg (hex) | Data Memory (hex)
+-------------------------------------------------------------------------
+0x   0: 00000000100000000000000011101111 | x 0:    0 | 0x   0:    0
+0x   4: 00000001000000000000000011101111 | x 1:    8 | 0x   4:    0
+0x   8: 00000000110001011000010100110011 | x 2:    0 | 0x   8:    0
+0x   c: 01000000101001101000111100110011 | x 3:    0 | 0x   c:    0
+0x  10: 00000000000000001000000011100111 | x 4:    0 | 0x  10:    0
+0x  14: 00000001111001000010000000100011 | x 5:    0 | 0x  14:    0
+0x  18: 00000000000000000000000000000000 | x 6:    0 | 0x  18:    0
+0x  1c: 00000000000000000000000000000000 | x 7:    0 | 0x  1c:    0
+0x  20: 00000000000000000000000000000000 | x 8:   20 | 0x  20:    3
+0x  24: 00000000000000000000000000000000 | x 9:    0 | 0x  24:    0
+0x  28: 00000000000000000000000000000000 | x10:    c | 0x  28:    0
+0x  2c: 00000000000000000000000000000000 | x11:    2 | 0x  2c:    0
+0x  30: 00000000000000000000000000000000 | x12:    a | 0x  30:    0
+0x  34: 00000000000000000000000000000000 | x13:    f | 0x  34:    0
+0x  38: 00000000000000000000000000000000 | x14:    0 | 0x  38:    0
+0x  3c: 00000000000000000000000000000000 | x15:    0 | 0x  3c:    0
+0x  40: 00000000000000000000000000000000 | x16:    0 | 0x  40:    0
+0x  44: 00000000000000000000000000000000 | x17:    0 | 0x  44:    0
+0x  48: 00000000000000000000000000000000 | x18:    0 | 0x  48:    0
+0x  4c: 00000000000000000000000000000000 | x19:    0 | 0x  4c:    0
+0x  50: 00000000000000000000000000000000 | x20:    0 | 0x  50:    0
+0x  54: 00000000000000000000000000000000 | x21:    0 | 0x  54:    0
+0x  58: 00000000000000000000000000000000 | x22:    0 | 0x  58:    0
+0x  5c: 00000000000000000000000000000000 | x23:    0 | 0x  5c:    0
+0x  60: 00000000000000000000000000000000 | x24:    0 | 0x  60:    0
+0x  64: 00000000000000000000000000000000 | x25:    0 | 0x  64:    0
+0x  68: 00000000000000000000000000000000 | x26:    0 | 0x  68:    0
+0x  6c: 00000000000000000000000000000000 | x27:    0 | 0x  6c:    0
+0x  70: 00000000000000000000000000000000 | x28:    0 | 0x  70:    0
+0x  74: 00000000000000000000000000000000 | x29:    0 | 0x  74:    0
+0x  78: 00000000000000000000000000000000 | x30:    3 | 0x  78:    0
+0x  7c: 00000000000000000000000000000000 | x31:    0 | 0x  7c:    0

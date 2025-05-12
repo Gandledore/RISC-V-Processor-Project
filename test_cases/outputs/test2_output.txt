@@ -1,0 +1,527 @@
+Loading test2.txt Instructions...
+
+total clock cycles: 1
+Fetch Stage  | Fetching instruction 0
+Decode Stage | NOP Instruction
+Execute Stage| NOP Instruction
+Write Stage  | NOP Instruction
+Memory Stage | NOP Instruction
+pc is modified to 0x4
+
+total clock cycles: 2
+Fetch Stage  | Fetching instruction 1
+Memory Stage | NOP Instruction
+Decode Stage | addi x5, x0, 0 | Instruction Dependence Offsets: (0, 0) | Instruction Dependencies: (Buf: 2, Need: 2, Dep: 0), (Buf: 5, Need: 5, Dep: 0)
+Write Stage  | NOP Instruction
+Execute Stage| NOP Instruction
+pc is modified to 0x8
+
+total clock cycles: 3
+Decode Stage | addi x6, x0, 0 | Instruction Dependence Offsets: (0, 0) | Instruction Dependencies: (Buf: 2, Need: 2, Dep: 0), (Buf: 5, Need: 5, Dep: 0)
+Execute Stage| 0, 0 | 0 = 0 + 0
+Memory Stage | NOP Instruction
+Write Stage  | NOP Instruction
+Fetch Stage  | Fetching instruction 2
+pc is modified to 0xc
+
+total clock cycles: 4
+Execute Stage| 0, 0 | 0 = 0 + 0
+Decode Stage | addi x7, x5, 20 | Instruction Dependence Offsets: (2, 0) | Instruction Dependencies: (Buf: 4, Need: 2, Dep: 1), (Buf: 5, Need: 5, Dep: 0)
+Write Stage  | NOP Instruction
+Fetch Stage  | Fetching instruction 3
+Memory Stage | Did not use Memory
+pc is modified to 0x10
+
+total clock cycles: 5
+Execute Stage| 4, 0 | 20 = 0 + 20
+Decode Stage | addi x31, x0, 4 | Instruction Dependence Offsets: (0, 0) | Instruction Dependencies: (Buf: 2, Need: 2, Dep: 0), (Buf: 5, Need: 5, Dep: 0)
+Fetch Stage  | Fetching instruction 4
+Memory Stage | Did not use Memory
+Write Stage  | x5 is modified to 0x0
+pc is modified to 0x14
+
+total clock cycles: 6
+Fetch Stage  | Fetching instruction 5
+Memory Stage | Did not use Memory
+Decode Stage | addi x8, x0, 5 | Instruction Dependence Offsets: (0, 0) | Instruction Dependencies: (Buf: 2, Need: 2, Dep: 0), (Buf: 5, Need: 5, Dep: 0)
+Execute Stage| 0, 0 | 4 = 0 + 4
+Write Stage  | x6 is modified to 0x0
+pc is modified to 0x18
+
+total clock cycles: 7
+Decode Stage | lw x29, x7, 0 | Instruction Dependence Offsets: (3, 0) | Instruction Dependencies: (Buf: 5, Need: 2, Dep: 1), (Buf: 5, Need: 5, Dep: 0)
+Memory Stage | Did not use Memory
+Execute Stage| 0, 0 | 5 = 0 + 5
+Write Stage  | x7 is modified to 0x14
+Fetch Stage  | Fetching instruction 6
+pc is modified to 0x1c
+
+total clock cycles: 8
+Execute Stage| 5, 0 | 20 = 20 + 0
+Memory Stage | Did not use Memory
+Write Stage  | x31 is modified to 0x4
+Fetch Stage  | Fetching instruction 7
+Decode Stage | addi x6, x6, 1 | Instruction Dependence Offsets: (0, 0) | Instruction Dependencies: (Buf: 2, Need: 2, Dep: 0), (Buf: 5, Need: 5, Dep: 0)
+pc is modified to 0x20
+
+total clock cycles: 9
+Execute Stage| 0, 0 | 1 = 0 + 1
+Decode Stage | addi x7, x7, 4 | Instruction Dependence Offsets: (0, 0) | Instruction Dependencies: (Buf: 2, Need: 2, Dep: 0), (Buf: 5, Need: 5, Dep: 0)
+Memory Stage | Read memory at 0x14 = 0xabc
+Write Stage  | x8 is modified to 0x5
+Fetch Stage  | Fetching instruction 8
+pc is modified to 0x24
+
+total clock cycles: 10
+Decode Stage | beq x6, x8, 24 | Instruction Dependence Offsets: (2, 0) | Instruction Dependencies: (Buf: 3, Need: 1, Dep: 1), (Buf: 1, Need: 1, Dep: 0)
+Write Stage  | x29 is modified to 0xabc
+Fetch Stage  | Fetching instruction 9
+Memory Stage | Did not use Memory
+Execute Stage| 0, 0 | 24 = 20 + 4
+pc is modified to 0x28
+
+total clock cycles: 11
+Memory Stage | Did not use Memory
+Execute Stage| 0, 0 | -4 = 1 - 5
+Decode Stage | lw x28, x7, 0 | Instruction Dependence Offsets: (2, 0) | Instruction Dependencies: (Buf: 4, Need: 2, Dep: 1), (Buf: 5, Need: 5, Dep: 0)
+Write Stage  | x6 is modified to 0x1
+Fetch Stage  | Fetching instruction 10
+pc is modified to 0x2c
+
+total clock cycles: 12
+Write Stage  | x7 is modified to 0x18
+Memory Stage | NOP Instruction
+Decode Stage | jal x1, 28 | Instruction Dependence Offsets: (0, 1) | Instruction Dependencies: (Buf: 5, Need: 5, Dep: 0), (Buf: 6, Need: 5, Dep: 0) | Flushing
+Fetch Stage  | Fetching instruction 11
+Execute Stage| 4, 0 | 24 = 24 + 0
+pc is modified to 0x44
+
+total clock cycles: 13
+Write Stage  | NOP Instruction
+Execute Stage| 0, 0 | 0 = 0 + 0
+Fetch Stage  | Fetching instruction 17
+Memory Stage | Read memory at 0x18 = 0xdef
+Decode Stage | NOP Instruction
+pc is modified to 0x48
+
+total clock cycles: 14
+Write Stage  | x28 is modified to 0xdef
+Fetch Stage  | Fetching instruction 18
+Memory Stage | Did not use Memory
+Execute Stage| NOP Instruction
+Decode Stage | and x29, x29, x28 | Instruction Dependence Offsets: (0, 3) | Instruction Dependencies: (Buf: 2, Need: 2, Dep: 0), (Buf: 5, Need: 2, Dep: 1)
+pc is modified to 0x4c
+
+total clock cycles: 15
+Decode Stage | jalr x0, x1, 0 | Instruction Dependence Offsets: (3, 0) | Instruction Dependencies: (Buf: 4, Need: 1, Dep: 1), (Buf: 5, Need: 5, Dep: 0) | Flushing
+Memory Stage | NOP Instruction
+Write Stage  | x1 is modified to 0x2c
+Fetch Stage  | Fetching NOP Instruction (max_pc)
+Execute Stage| 0, 5 | 2220 = 2748 & 3567
+pc is modified to 0x2c
+
+total clock cycles: 16
+Write Stage  | NOP Instruction
+Memory Stage | Did not use Memory
+Execute Stage| 0, 0 | 44 = 44 + 0
+Fetch Stage  | Fetching instruction 11
+Decode Stage | NOP Instruction
+pc is modified to 0x30
+
+total clock cycles: 17
+Fetch Stage  | Fetching instruction 12
+Decode Stage | addi x6, x6, 1 | Instruction Dependence Offsets: (0, 0) | Instruction Dependencies: (Buf: 2, Need: 2, Dep: 0), (Buf: 5, Need: 5, Dep: 0)
+Execute Stage| NOP Instruction
+Write Stage  | x29 is modified to 0x8ac
+Memory Stage | Did not use Memory
+pc is modified to 0x34
+
+total clock cycles: 18
+Fetch Stage  | Fetching instruction 13
+Execute Stage| 0, 0 | 2 = 1 + 1
+Write Stage  | Did not write
+Memory Stage | NOP Instruction
+Decode Stage | add x7, x7, x31 | Instruction Dependence Offsets: (0, 0) | Instruction Dependencies: (Buf: 2, Need: 2, Dep: 0), (Buf: 2, Need: 2, Dep: 0)
+pc is modified to 0x38
+
+total clock cycles: 19
+Fetch Stage  | Fetching instruction 14
+Execute Stage| 0, 0 | 28 = 24 + 4
+Write Stage  | NOP Instruction
+Memory Stage | Did not use Memory
+Decode Stage | beq x0, x0, -20 | Instruction Dependence Offsets: (0, 0) | Instruction Dependencies: (Buf: 1, Need: 1, Dep: 0), (Buf: 1, Need: 1, Dep: 0) | Flushing
+pc is modified to 0x20
+
+total clock cycles: 20
+Memory Stage | Did not use Memory
+Fetch Stage  | Fetching instruction 8
+Write Stage  | x6 is modified to 0x2
+Decode Stage | NOP Instruction
+Execute Stage| 0, 0 | 0 = 0 - 0
+pc is modified to 0x24
+
+total clock cycles: 21
+Write Stage  | x7 is modified to 0x1c
+Fetch Stage  | Fetching instruction 9
+Memory Stage | NOP Instruction
+Execute Stage| NOP Instruction
+Decode Stage | beq x6, x8, 24 | Instruction Dependence Offsets: (0, 0) | Instruction Dependencies: (Buf: 1, Need: 1, Dep: 0), (Buf: 1, Need: 1, Dep: 0)
+pc is modified to 0x28
+
+total clock cycles: 22
+Write Stage  | NOP Instruction
+Fetch Stage  | Fetching instruction 10
+Memory Stage | NOP Instruction
+Decode Stage | lw x28, x7, 0 | Instruction Dependence Offsets: (0, 0) | Instruction Dependencies: (Buf: 2, Need: 2, Dep: 0), (Buf: 5, Need: 5, Dep: 0)
+Execute Stage| 0, 0 | -3 = 2 - 5
+pc is modified to 0x2c
+
+total clock cycles: 23
+Write Stage  | NOP Instruction
+Fetch Stage  | Fetching instruction 11
+Execute Stage| 0, 0 | 28 = 28 + 0
+Decode Stage | jal x1, 28 | Instruction Dependence Offsets: (0, 1) | Instruction Dependencies: (Buf: 5, Need: 5, Dep: 0), (Buf: 6, Need: 5, Dep: 0) | Flushing
+Memory Stage | NOP Instruction
+pc is modified to 0x44
+
+total clock cycles: 24
+Write Stage  | NOP Instruction
+Fetch Stage  | Fetching instruction 17
+Decode Stage | NOP Instruction
+Memory Stage | Read memory at 0x1c = 0x1234
+Execute Stage| 0, 0 | 3567 = 0 + 3567
+pc is modified to 0x48
+
+total clock cycles: 25
+Execute Stage| NOP Instruction
+Fetch Stage  | Fetching instruction 18
+Decode Stage | and x29, x29, x28 | Instruction Dependence Offsets: (0, 3) | Instruction Dependencies: (Buf: 2, Need: 2, Dep: 0), (Buf: 5, Need: 2, Dep: 1)
+Write Stage  | x28 is modified to 0x1234
+Memory Stage | Did not use Memory
+pc is modified to 0x4c
+
+total clock cycles: 26
+Memory Stage | NOP Instruction
+Execute Stage| 0, 5 | 36 = 2220 & 4660
+Write Stage  | x1 is modified to 0x2c
+Decode Stage | jalr x0, x1, 0 | Instruction Dependence Offsets: (3, 0) | Instruction Dependencies: (Buf: 4, Need: 1, Dep: 1), (Buf: 5, Need: 5, Dep: 0) | Flushing
+Fetch Stage  | Fetching NOP Instruction (max_pc)
+pc is modified to 0x2c
+
+total clock cycles: 27
+Execute Stage| 0, 0 | 44 = 44 + 0
+Write Stage  | NOP Instruction
+Fetch Stage  | Fetching instruction 11
+Decode Stage | NOP Instruction
+Memory Stage | Did not use Memory
+pc is modified to 0x30
+
+total clock cycles: 28
+Write Stage  | x29 is modified to 0x24
+Fetch Stage  | Fetching instruction 12
+Memory Stage | Did not use Memory
+Decode Stage | addi x6, x6, 1 | Instruction Dependence Offsets: (0, 0) | Instruction Dependencies: (Buf: 2, Need: 2, Dep: 0), (Buf: 5, Need: 5, Dep: 0)
+Execute Stage| NOP Instruction
+pc is modified to 0x34
+
+total clock cycles: 29
+Write Stage  | Did not write
+Fetch Stage  | Fetching instruction 13
+Memory Stage | NOP Instruction
+Decode Stage | add x7, x7, x31 | Instruction Dependence Offsets: (0, 0) | Instruction Dependencies: (Buf: 2, Need: 2, Dep: 0), (Buf: 2, Need: 2, Dep: 0)
+Execute Stage| 0, 0 | 3 = 2 + 1
+pc is modified to 0x38
+
+total clock cycles: 30
+Write Stage  | NOP Instruction
+Memory Stage | Did not use Memory
+Fetch Stage  | Fetching instruction 14
+Execute Stage| 0, 0 | 32 = 28 + 4
+Decode Stage | beq x0, x0, -20 | Instruction Dependence Offsets: (0, 0) | Instruction Dependencies: (Buf: 1, Need: 1, Dep: 0), (Buf: 1, Need: 1, Dep: 0) | Flushing
+pc is modified to 0x20
+
+total clock cycles: 31
+Memory Stage | Did not use Memory
+Fetch Stage  | Fetching instruction 8
+Write Stage  | x6 is modified to 0x3
+Decode Stage | NOP Instruction
+Execute Stage| 0, 0 | 0 = 0 - 0
+pc is modified to 0x24
+
+total clock cycles: 32
+Memory Stage | NOP Instruction
+Fetch Stage  | Fetching instruction 9
+Write Stage  | x7 is modified to 0x20
+Decode Stage | beq x6, x8, 24 | Instruction Dependence Offsets: (0, 0) | Instruction Dependencies: (Buf: 1, Need: 1, Dep: 0), (Buf: 1, Need: 1, Dep: 0)
+Execute Stage| NOP Instruction
+pc is modified to 0x28
+
+total clock cycles: 33
+Memory Stage | NOP Instruction
+Write Stage  | NOP Instruction
+Decode Stage | lw x28, x7, 0 | Instruction Dependence Offsets: (0, 0) | Instruction Dependencies: (Buf: 2, Need: 2, Dep: 0), (Buf: 5, Need: 5, Dep: 0)
+Fetch Stage  | Fetching instruction 10
+Execute Stage| 0, 0 | -2 = 3 - 5
+pc is modified to 0x2c
+
+total clock cycles: 34
+Write Stage  | NOP Instruction
+Memory Stage | NOP Instruction
+Fetch Stage  | Fetching instruction 11
+Decode Stage | jal x1, 28 | Instruction Dependence Offsets: (0, 1) | Instruction Dependencies: (Buf: 5, Need: 5, Dep: 0), (Buf: 6, Need: 5, Dep: 0) | Flushing
+Execute Stage| 0, 0 | 32 = 32 + 0
+pc is modified to 0x44
+
+total clock cycles: 35
+Memory Stage | Read memory at 0x20 = 0x5678
+Decode Stage | NOP Instruction
+Write Stage  | NOP Instruction
+Execute Stage| 0, 0 | 4660 = 0 + 4660
+Fetch Stage  | Fetching instruction 17
+pc is modified to 0x48
+
+total clock cycles: 36
+Fetch Stage  | Fetching instruction 18
+Execute Stage| NOP Instruction
+Memory Stage | Did not use Memory
+Decode Stage | and x29, x29, x28 | Instruction Dependence Offsets: (0, 3) | Instruction Dependencies: (Buf: 2, Need: 2, Dep: 0), (Buf: 5, Need: 2, Dep: 1)
+Write Stage  | x28 is modified to 0x5678
+pc is modified to 0x4c
+
+total clock cycles: 37
+Execute Stage| 0, 5 | 32 = 36 & 22136
+Memory Stage | NOP Instruction
+Write Stage  | x1 is modified to 0x2c
+Fetch Stage  | Fetching NOP Instruction (max_pc)
+Decode Stage | jalr x0, x1, 0 | Instruction Dependence Offsets: (3, 0) | Instruction Dependencies: (Buf: 4, Need: 1, Dep: 1), (Buf: 5, Need: 5, Dep: 0) | Flushing
+pc is modified to 0x2c
+
+total clock cycles: 38
+Fetch Stage  | Fetching instruction 11
+Memory Stage | Did not use Memory
+Write Stage  | NOP Instruction
+Decode Stage | NOP Instruction
+Execute Stage| 0, 0 | 44 = 44 + 0
+pc is modified to 0x30
+
+total clock cycles: 39
+Execute Stage| NOP Instruction
+Fetch Stage  | Fetching instruction 12
+Decode Stage | addi x6, x6, 1 | Instruction Dependence Offsets: (0, 0) | Instruction Dependencies: (Buf: 2, Need: 2, Dep: 0), (Buf: 5, Need: 5, Dep: 0)
+Memory Stage | Did not use Memory
+Write Stage  | x29 is modified to 0x20
+pc is modified to 0x34
+
+total clock cycles: 40
+Execute Stage| 0, 0 | 4 = 3 + 1
+Memory Stage | NOP Instruction
+Fetch Stage  | Fetching instruction 13
+Decode Stage | add x7, x7, x31 | Instruction Dependence Offsets: (0, 0) | Instruction Dependencies: (Buf: 2, Need: 2, Dep: 0), (Buf: 2, Need: 2, Dep: 0)
+Write Stage  | Did not write
+pc is modified to 0x38
+
+total clock cycles: 41
+Memory Stage | Did not use Memory
+Fetch Stage  | Fetching instruction 14
+Execute Stage| 0, 0 | 36 = 32 + 4
+Write Stage  | NOP Instruction
+Decode Stage | beq x0, x0, -20 | Instruction Dependence Offsets: (0, 0) | Instruction Dependencies: (Buf: 1, Need: 1, Dep: 0), (Buf: 1, Need: 1, Dep: 0) | Flushing
+pc is modified to 0x20
+
+total clock cycles: 42
+Fetch Stage  | Fetching instruction 8
+Memory Stage | Did not use Memory
+Execute Stage| 0, 0 | 0 = 0 - 0
+Write Stage  | x6 is modified to 0x4
+Decode Stage | NOP Instruction
+pc is modified to 0x24
+
+total clock cycles: 43
+Write Stage  | x7 is modified to 0x24
+Execute Stage| NOP Instruction
+Memory Stage | NOP Instruction
+Fetch Stage  | Fetching instruction 9
+Decode Stage | beq x6, x8, 24 | Instruction Dependence Offsets: (0, 0) | Instruction Dependencies: (Buf: 1, Need: 1, Dep: 0), (Buf: 1, Need: 1, Dep: 0)
+pc is modified to 0x28
+
+total clock cycles: 44
+Write Stage  | NOP Instruction
+Memory Stage | NOP Instruction
+Decode Stage | lw x28, x7, 0 | Instruction Dependence Offsets: (0, 0) | Instruction Dependencies: (Buf: 2, Need: 2, Dep: 0), (Buf: 5, Need: 5, Dep: 0)
+Execute Stage| 0, 0 | -1 = 4 - 5
+Fetch Stage  | Fetching instruction 10
+pc is modified to 0x2c
+
+total clock cycles: 45
+Write Stage  | NOP Instruction
+Decode Stage | jal x1, 28 | Instruction Dependence Offsets: (0, 1) | Instruction Dependencies: (Buf: 5, Need: 5, Dep: 0), (Buf: 6, Need: 5, Dep: 0) | Flushing
+Fetch Stage  | Fetching instruction 11
+Execute Stage| 0, 0 | 36 = 36 + 0
+Memory Stage | NOP Instruction
+pc is modified to 0x44
+
+total clock cycles: 46
+Fetch Stage  | Fetching instruction 17
+Execute Stage| 0, 0 | 22136 = 0 + 22136
+Decode Stage | NOP Instruction
+Memory Stage | Read memory at 0x24 = 0x9abc
+Write Stage  | NOP Instruction
+pc is modified to 0x48
+
+total clock cycles: 47
+Memory Stage | Did not use Memory
+Fetch Stage  | Fetching instruction 18
+Write Stage  | x28 is modified to 0x9abc
+Execute Stage| NOP Instruction
+Decode Stage | and x29, x29, x28 | Instruction Dependence Offsets: (0, 3) | Instruction Dependencies: (Buf: 2, Need: 2, Dep: 0), (Buf: 5, Need: 2, Dep: 1)
+pc is modified to 0x4c
+
+total clock cycles: 48
+Write Stage  | x1 is modified to 0x2c
+Fetch Stage  | Fetching NOP Instruction (max_pc)
+Decode Stage | jalr x0, x1, 0 | Instruction Dependence Offsets: (3, 0) | Instruction Dependencies: (Buf: 4, Need: 1, Dep: 1), (Buf: 5, Need: 5, Dep: 0) | Flushing
+Memory Stage | NOP Instruction
+Execute Stage| 0, 5 | 32 = 32 & 39612
+pc is modified to 0x2c
+
+total clock cycles: 49
+Fetch Stage  | Fetching instruction 11
+Write Stage  | NOP Instruction
+Decode Stage | NOP Instruction
+Execute Stage| 0, 0 | 44 = 44 + 0
+Memory Stage | Did not use Memory
+pc is modified to 0x30
+
+total clock cycles: 50
+Fetch Stage  | Fetching instruction 12
+Execute Stage| NOP Instruction
+Decode Stage | addi x6, x6, 1 | Instruction Dependence Offsets: (0, 0) | Instruction Dependencies: (Buf: 2, Need: 2, Dep: 0), (Buf: 5, Need: 5, Dep: 0)
+Memory Stage | Did not use Memory
+Write Stage  | x29 is modified to 0x20
+pc is modified to 0x34
+
+total clock cycles: 51
+Fetch Stage  | Fetching instruction 13
+Decode Stage | add x7, x7, x31 | Instruction Dependence Offsets: (0, 0) | Instruction Dependencies: (Buf: 2, Need: 2, Dep: 0), (Buf: 2, Need: 2, Dep: 0)
+Execute Stage| 0, 0 | 5 = 4 + 1
+Write Stage  | Did not write
+Memory Stage | NOP Instruction
+pc is modified to 0x38
+
+total clock cycles: 52
+Memory Stage | Did not use Memory
+Write Stage  | NOP Instruction
+Execute Stage| 0, 0 | 40 = 36 + 4
+Decode Stage | beq x0, x0, -20 | Instruction Dependence Offsets: (0, 0) | Instruction Dependencies: (Buf: 1, Need: 1, Dep: 0), (Buf: 1, Need: 1, Dep: 0) | Flushing
+Fetch Stage  | Fetching instruction 14
+pc is modified to 0x20
+
+total clock cycles: 53
+Write Stage  | x6 is modified to 0x5
+Decode Stage | NOP Instruction
+Fetch Stage  | Fetching instruction 8
+Execute Stage| 0, 0 | 0 = 0 - 0
+Memory Stage | Did not use Memory
+pc is modified to 0x24
+
+total clock cycles: 54
+Fetch Stage  | Fetching instruction 9
+Execute Stage| NOP Instruction
+Memory Stage | NOP Instruction
+Decode Stage | beq x6, x8, 24 | Instruction Dependence Offsets: (0, 0) | Instruction Dependencies: (Buf: 1, Need: 1, Dep: 0), (Buf: 1, Need: 1, Dep: 0) | Flushing
+Write Stage  | x7 is modified to 0x28
+pc is modified to 0x38
+
+total clock cycles: 55
+Fetch Stage  | Fetching instruction 14
+Memory Stage | NOP Instruction
+Execute Stage| 0, 0 | 0 = 5 - 5
+Decode Stage | NOP Instruction
+Write Stage  | NOP Instruction
+pc is modified to 0x3c
+
+total clock cycles: 56
+Execute Stage| NOP Instruction
+Fetch Stage  | Fetching instruction 15
+Memory Stage | NOP Instruction
+Decode Stage | addi x30, x5, 100 | Instruction Dependence Offsets: (0, 0) | Instruction Dependencies: (Buf: 2, Need: 2, Dep: 0), (Buf: 5, Need: 5, Dep: 0)
+Write Stage  | NOP Instruction
+pc is modified to 0x40
+
+total clock cycles: 57
+Fetch Stage  | Fetching instruction 16
+Execute Stage| 0, 0 | 100 = 0 + 100
+Memory Stage | NOP Instruction
+Write Stage  | NOP Instruction
+Decode Stage | sw x30, x29, 0 | Instruction Dependence Offsets: (1, 0) | Instruction Dependencies: (Buf: 3, Need: 2, Dep: 1), (Buf: 3, Need: 3, Dep: 0)
+pc is modified to 0x44
+
+total clock cycles: 58
+Execute Stage| 3, 0 | 100 = 100 + 0
+Fetch Stage  | Fetching instruction 17
+Memory Stage | Did not use Memory
+Decode Stage | beq x0, x0, 12 | Instruction Dependence Offsets: (0, 0) | Instruction Dependencies: (Buf: 1, Need: 1, Dep: 0), (Buf: 1, Need: 1, Dep: 0) | Flushing
+Write Stage  | NOP Instruction
+pc is modified to 0x4c
+
+total clock cycles: 59
+Fetch Stage  | Fetching NOP Instruction (max_pc)
+Execute Stage| 0, 0 | 0 = 0 - 0
+Memory Stage | memory 0x64 is modified to 0x20
+Decode Stage | NOP Instruction
+Write Stage  | x30 is modified to 0x64
+pc is modified to 0x4c
+
+total clock cycles: 60
+Fetch Stage  | Fetching NOP Instruction (max_pc)
+Memory Stage | NOP Instruction
+Write Stage  | NOP Instruction
+Decode Stage | NOP Instruction
+Execute Stage| NOP Instruction
+pc is modified to 0x4c
+
+total clock cycles: 61
+Fetch Stage  | Fetching NOP Instruction (max_pc)
+Memory Stage | NOP Instruction
+Execute Stage| NOP Instruction
+Decode Stage | NOP Instruction
+Write Stage  | NOP Instruction
+pc is modified to 0x4c
+
+Program Finished
+
+
+  Addr:  Instruction Memory (Binary)     | Reg (hex) | Data Memory (hex)
+-------------------------------------------------------------------------
+0x   0: 00000000000000000000001010010011 | x 0:    0 | 0x   0:    0
+0x   4: 00000000000000000000001100010011 | x 1:   2c | 0x   4:    0
+0x   8: 00000001010000101000001110010011 | x 2:    0 | 0x   8:    0
+0x   c: 00000000010000000000111110010011 | x 3:    0 | 0x   c:    0
+0x  10: 00000000010100000000010000010011 | x 4:    0 | 0x  10:    0
+0x  14: 00000000000000111010111010000011 | x 5:    0 | 0x  14:  abc
+0x  18: 00000000000100110000001100010011 | x 6:    5 | 0x  18:  def
+0x  1c: 00000000010000111000001110010011 | x 7:   28 | 0x  1c: 1234
+0x  20: 00000000100000110000110001100011 | x 8:    5 | 0x  20: 5678
+0x  24: 00000000000000111010111000000011 | x 9:    0 | 0x  24: 9abc
+0x  28: 00000001110000000000000011101111 | x10:    0 | 0x  28:    0
+0x  2c: 00000000000100110000001100010011 | x11:    0 | 0x  2c:    0
+0x  30: 00000001111100111000001110110011 | x12:    0 | 0x  30:    0
+0x  34: 11111110000000000000011011100011 | x13:    0 | 0x  34:    0
+0x  38: 00000110010000101000111100010011 | x14:    0 | 0x  38:    0
+0x  3c: 00000001110111110010000000100011 | x15:    0 | 0x  3c:    0
+0x  40: 00000000000000000000011001100011 | x16:    0 | 0x  40:    0
+0x  44: 00000001110011101111111010110011 | x17:    0 | 0x  44:    0
+0x  48: 00000000000000001000000001100111 | x18:    0 | 0x  48:    0
+0x  4c: 00000000000000000000000000000000 | x19:    0 | 0x  4c:    0
+0x  50: 00000000000000000000000000000000 | x20:    0 | 0x  50:    0
+0x  54: 00000000000000000000000000000000 | x21:    0 | 0x  54:    0
+0x  58: 00000000000000000000000000000000 | x22:    0 | 0x  58:    0
+0x  5c: 00000000000000000000000000000000 | x23:    0 | 0x  5c:    0
+0x  60: 00000000000000000000000000000000 | x24:    0 | 0x  60:    0
+0x  64: 00000000000000000000000000000000 | x25:    0 | 0x  64:   20
+0x  68: 00000000000000000000000000000000 | x26:    0 | 0x  68:    0
+0x  6c: 00000000000000000000000000000000 | x27:    0 | 0x  6c:    0
+0x  70: 00000000000000000000000000000000 | x28: 9abc | 0x  70:    0
+0x  74: 00000000000000000000000000000000 | x29:   20 | 0x  74:    0
+0x  78: 00000000000000000000000000000000 | x30:   64 | 0x  78:    0
+0x  7c: 00000000000000000000000000000000 | x31:    4 | 0x  7c:    0

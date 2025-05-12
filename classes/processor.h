@@ -132,7 +132,7 @@ class Processor{
         else if(filename=="test3.txt"){//expected output 0x27a at memory 0x64
             dmem[3] = 0x34; dmem[4] = 0x77; dmem[5] = 0x28; dmem[6] = 0xb6; dmem[7] = 0xf1;
         }
-        else if(filename=="data_dependency.txt"){//expected output 0xac at memory 0x30, 0x34, 0x38, 0x3c
+        else if(filename=="data_dependency.txt" || filename=="test4.txt"){//expected output 0xac at memory 0x30, 0x34, 0x38, 0x3c
             dmem[16] = 1, dmem[17] = 1; dmem[18] = 1; dmem[19] = 2;
         }
         else{
@@ -234,6 +234,7 @@ class Processor{
 
         int endgame=4;
         std::ostringstream clock_stream;
+        int delay_time = 1; //could increase to slow down for weak human eyes
         while(total_clock_cycles++<max_clock_cycles && pc<=max_pc && endgame>0){
             clock_stream.str("");
             clock_stream << "\ntotal clock cycles: " << std::dec << total_clock_cycles;
@@ -241,13 +242,13 @@ class Processor{
 
             clock_tick.arrive_and_wait();//wait to start all stages for synchronization (rising edge)
             //cycle in progress
-            std::this_thread::sleep_for(std::chrono::milliseconds(10)); // Slow down for humans
+            std::this_thread::sleep_for(std::chrono::milliseconds(delay_time)); // simulate clock period
             
             //cycle done, begin cycle cleanup
             clock_tick.arrive_and_wait();//falling edge
             if(!program_finished){ pc = new_pc;}//keep pc pointing to max_pc if done so no out of bounds
             else{endgame--;pc=max_pc;}//finish program in 4 more cycles (pc should be max pc natrually)
-            std::this_thread::sleep_for(std::chrono::milliseconds(10)); // Slow down for humans
+            std::this_thread::sleep_for(std::chrono::milliseconds(delay_time)); // simulate clock period
             clock_stream.str("");
             clock_stream << "pc is modified to 0x" << std::hex << pc;
             debug_msg(clock_stream);
@@ -492,7 +493,7 @@ class Processor{
             
             if(jump_taken){//if branch taken, flush
                 flush_flag = true;
-                decode_stream << "\nFlushing";
+                decode_stream << " | Flushing";
             }
             
             //program is finished if pc is pointing after all instructions 
